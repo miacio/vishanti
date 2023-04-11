@@ -1,0 +1,6 @@
+[email]
+name="miajio" # 发送者邮件名称
+mailAddr="miajio@163.com" # 发送者邮件地址
+smtpAddr="smtp.163.com:25"
+hostAddr="smtp.163.com"
+password="IDLEHXQGHMBYBONM" # 邮箱授权码
