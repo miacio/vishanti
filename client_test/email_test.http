@@ -1,8 +1,8 @@
 ###
-POST http://localhost:8080/email/checkCode
+POST http://localhost:8080/email/sendCheckCode
 Content-Type: application/json
 
 {
-    "email": "187737829",
-    "emailType": "test"
+    "email": "1877378299@qq.com",
+    "emailType": "register"
 }
