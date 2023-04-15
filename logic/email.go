@@ -47,7 +47,7 @@ func (e *emailLogic) SendCheckCode(ctx *gin.Context) {
 		if !lib.ServerFail(ctx, err) {
 			return
 		}
-		lib.ServerResult(ctx, 200, "发送成功", code, nil)
+		lib.ServerSuccess(ctx, "发送成功", code)
 	case "login":
 		ok, err := store.UserStore.EmailRepeat(req.Email)
 		if !lib.ServerFail(ctx, err) {
@@ -61,13 +61,13 @@ func (e *emailLogic) SendCheckCode(ctx *gin.Context) {
 		if !lib.ServerFail(ctx, err) {
 			return
 		}
-		lib.ServerResult(ctx, 200, "发送成功", code, nil)
+		lib.ServerSuccess(ctx, "发送成功", code)
 	case "update":
 		code, err := e.emailRegister(req.Email)
 		if !lib.ServerFail(ctx, err) {
 			return
 		}
-		lib.ServerResult(ctx, 200, "发送成功", code, nil)
+		lib.ServerSuccess(ctx, "发送成功", code)
 	default:
 		lib.ServerResult(ctx, 400, "参数错误", nil, errors.New("未知的邮件推送请求"))
 	}
@@ -80,6 +80,8 @@ func (e *emailLogic) CheckCode(email, emailType, uid, code string) error {
 	switch emailType {
 	case "register":
 		key = "EMAIL:REGISTER:" + email + ":" + uid
+	case "login":
+		key = "EMAIL:LOGIN:" + email + ":" + uid
 	case "update":
 		key = "EMAIL:UPDATE:" + email + ":" + uid
 	}
@@ -138,7 +140,7 @@ func (*emailLogic) emailLogin(email string) (string, error) {
 	}
 
 	rc := context.Background()
-	if err := lib.RedisClient.SetEx(rc, "EMAIL:LOGINE:"+email+":"+uid, code, time.Minute*30).Err(); err != nil {
+	if err := lib.RedisClient.SetEx(rc, "EMAIL:LOGIN:"+email+":"+uid, code, time.Minute*30).Err(); err != nil {
 		return "", err
 	}
 	return uid, nil

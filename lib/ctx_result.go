@@ -38,3 +38,15 @@ func ServerResult(ctx *gin.Context, code int, msg string, data any, err error) {
 	}
 	ctx.JSON(http.StatusOK, param)
 }
+
+// 统一成功响应方法
+func ServerSuccess(ctx *gin.Context, msg string, data any) {
+	param := gin.H{
+		"code": 200,
+		"msg":  msg,
+	}
+	if data != nil {
+		param["data"] = data
+	}
+	ctx.JSON(http.StatusOK, param)
+}

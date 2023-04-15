@@ -1,0 +1,20 @@
+[email]
+name="miajio" # 发送者邮件名称
+mailAddr="miajio@163.com" # 发送者邮件地址
+smtpAddr="smtp.163.com:25"
+hostAddr="smtp.163.com"
+password="" # 邮箱授权码
+
+[redis]
+host="127.0.0.1:6379" # redis 服务器地址
+password="" # redis 密码
+db=0 # 默认连接库
+
+[mysql]
+host="127.0.0.1:3306"
+user="miajio"
+password="123456"
+database="miajiodb"
+charset="utf8mb4"
+parseTime="True"
+loc="Local"
