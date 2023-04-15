@@ -1,0 +1,16 @@
+
+###
+POST http://localhost:8080/user/email/register
+Content-Type: application/json
+
+{
+    "email": "1877378299@qq.com",
+    "code": "DB7ZN6",
+    "uid": "291A4E0C605D4DEF8FE76ED96E47F005",
+    "nickName": "昵称",
+    "account": "vishanti",
+    "password": "123456"
+}
+
+###
+GET http://localhost:8080/user/token?token=13D1B526B9BF4D88B6789A892E3A4D76

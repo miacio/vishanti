@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/miacio/vishanti/lib"
+	"github.com/miacio/vishanti/store"
 )
 
 type emailLogic struct{}
@@ -29,30 +29,47 @@ type emailSendRequest struct {
 // SendCheckCode 发送验证码
 func (e *emailLogic) SendCheckCode(ctx *gin.Context) {
 	req := emailSendRequest{}
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "参数错误", "err": lib.TransError(err)})
+	if !lib.ShouldBind(ctx, &req) {
 		return
-	} else {
-		switch req.EmailType {
-		case "register":
-			if code, err := e.emailRegister(req.Email); err != nil {
-				ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "服务器异常", "err": err})
-				return
-			} else {
-				ctx.JSON(http.StatusOK, gin.H{"code": 200, "msg": "发送成功", "data": code})
-				return
-			}
-		case "update":
-			if code, err := e.emailRegister(req.Email); err != nil {
-				ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "服务器异常", "err": err})
-				return
-			} else {
-				ctx.JSON(http.StatusOK, gin.H{"code": 200, "msg": "发送成功", "data": code})
-				return
-			}
-		default:
-			ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "参数错误", "err": "未知的邮件推送请求"})
+	}
+
+	switch req.EmailType {
+	case "register":
+		ok, err := store.UserStore.EmailRepeat(req.Email)
+		if !lib.ServerFail(ctx, err) {
+			return
 		}
+		if ok {
+			lib.ServerResult(ctx, 400, "当前邮箱已经被注册,请勿重复注册", nil, nil)
+			return
+		}
+		code, err := e.emailRegister(req.Email)
+		if !lib.ServerFail(ctx, err) {
+			return
+		}
+		lib.ServerResult(ctx, 200, "发送成功", code, nil)
+	case "login":
+		ok, err := store.UserStore.EmailRepeat(req.Email)
+		if !lib.ServerFail(ctx, err) {
+			return
+		}
+		if !ok {
+			lib.ServerResult(ctx, 400, "当前邮箱未注册", nil, nil)
+			return
+		}
+		code, err := e.emailLogin(req.Email)
+		if !lib.ServerFail(ctx, err) {
+			return
+		}
+		lib.ServerResult(ctx, 200, "发送成功", code, nil)
+	case "update":
+		code, err := e.emailRegister(req.Email)
+		if !lib.ServerFail(ctx, err) {
+			return
+		}
+		lib.ServerResult(ctx, 200, "发送成功", code, nil)
+	default:
+		lib.ServerResult(ctx, 400, "参数错误", nil, errors.New("未知的邮件推送请求"))
 	}
 }
 
@@ -99,6 +116,29 @@ func (*emailLogic) emailRegister(email string) (string, error) {
 
 	rc := context.Background()
 	if err := lib.RedisClient.SetEx(rc, "EMAIL:REGISTER:"+email+":"+uid, code, time.Minute*30).Err(); err != nil {
+		return "", err
+	}
+	return uid, nil
+}
+
+func (*emailLogic) emailLogin(email string) (string, error) {
+	var msg strings.Builder
+	msg.WriteString("vishanti:\n")
+	msg.WriteString("    您好!您当前正在使用邮箱验证码登录,您的验证码是: %s\n")
+	msg.WriteString("    当前验证码的有效时间是: 30分钟\n")
+	msg.WriteString("如果非您本人操作,请删除该邮件并不要将验证码告诉给他人!")
+	m := msg.String()
+	code := lib.RandCheckCode(6)
+	m = fmt.Sprintf(m, code)
+
+	uid := lib.UID()
+
+	if err := lib.EmailCfg.Send(email, "欢迎您使用vishanti平台", m); err != nil {
+		return "", err
+	}
+
+	rc := context.Background()
+	if err := lib.RedisClient.SetEx(rc, "EMAIL:LOGINE:"+email+":"+uid, code, time.Minute*30).Err(); err != nil {
 		return "", err
 	}
 	return uid, nil

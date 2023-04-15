@@ -10,6 +10,8 @@ type userRouter struct{}
 
 func (*userRouter) Execute(e *gin.Engine) {
 	user := e.Group("/user")
+	user.GET("/token", logic.UserLogic.TokenGet)
 
-	user.GET("/email/register", logic.UserLogic.EmailRegister)
+	user.POST("/email/register", logic.UserLogic.EmailRegister)
+
 }

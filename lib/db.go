@@ -32,13 +32,13 @@ func (dp *DBCfgParam) DSN() string {
 		params["loc"] = dp.Loc
 	}
 
-	vals := make([]string, len(params))
+	vals := make([]string, 0)
 	for k, v := range params {
 		vals = append(vals, k+"="+v)
 	}
 	ps := strings.Join(vals, "&")
 	if ps != "" {
-		dsn += ps
+		dsn = dsn + "?" + ps
 	}
 	return dsn
 }

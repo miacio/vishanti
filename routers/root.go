@@ -17,9 +17,10 @@ func Register(e *web.Engine) {
 
 // 所有路由节点注册均写在这里,便于管理所有路由节点
 var (
-	root  web.Router = (*rootRouters)(nil) // root 根节点路由
-	email web.Router = (*emailRouter)(nil) // email 邮箱节点路由
-	user  web.Router = (*userRouter)(nil)  // user 用户节点路由
+	root             web.Router = (*rootRouters)(nil)            // root 根节点路由
+	systemDictionary web.Router = (*systemDictionaryRouter)(nil) // systemDictionary 系统字典节点路由
+	email            web.Router = (*emailRouter)(nil)            // email 邮箱节点路由
+	user             web.Router = (*userRouter)(nil)             // user 用户节点路由
 
 	routers = []web.Router{root, email, user}
 )
@@ -39,7 +40,7 @@ type (
 // 根节点路由注册
 func (*rootRouters) Execute(e *gin.Engine) {
 	pong := func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"code": 200, "msg": "pong"})
+		lib.ServerResult(ctx, 200, "pong", nil, nil)
 	}
 
 	errorHandler := func(ctx *gin.Context) {
