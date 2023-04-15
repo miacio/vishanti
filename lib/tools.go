@@ -30,8 +30,3 @@ func RandCheckCode(n int) string {
 func UID() string {
 	return strings.ToUpper(strings.ReplaceAll(uuid.New().String(), "-", ""))
 }
-
-// TableObject 表对象
-type TableObject interface {
-	TableName() string // 获取表名方法
-}

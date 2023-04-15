@@ -13,4 +13,5 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-.toml
+example/config.toml
+runner/config.toml
