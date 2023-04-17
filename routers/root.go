@@ -22,7 +22,7 @@ var (
 	email            web.Router = (*emailRouter)(nil)            // email 邮箱节点路由
 	user             web.Router = (*userRouter)(nil)             // user 用户节点路由
 
-	routers = []web.Router{root, email, user}
+	routers = []web.Router{root, systemDictionary, email, user}
 )
 
 // rootRouters 根节点路由实现 ↓↓↓

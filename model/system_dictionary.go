@@ -11,7 +11,7 @@ type SystemDictionary struct {
 	CreateTime  *JsonTime `db:"create_time" json:"create_time" xml:"create_time"`    // CreateTime create_time 创建时间
 	CreateBy    string    `db:"create_by" json:"create_by" xml:"create_by"`          // CreateBy create_by 创建人id
 	UpdateTime  *JsonTime `db:"update_time" json:"update_time" xml:"update_time"`    // UpdateTime update_time 修改时间
-	UpdateBy    *JsonTime `db:"update_by" json:"update_by" xml:"update_by"`          // UpdateBy update_by 修改人id
+	UpdateBy    string    `db:"update_by" json:"update_by" xml:"update_by"`          // UpdateBy update_by 修改人id
 }
 
 // TableName SystemDictionary system_dictionary

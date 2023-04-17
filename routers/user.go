@@ -25,7 +25,8 @@ func (*userRouter) Execute(e *gin.Engine) {
 	// 用户信息模块
 	detailedGroup := user.Group("/detailed", middlewares.Auth())
 	{
-		detailedGroup.POST("/update", logic.UserLogic.UpdateDetailed)
+		detailedGroup.POST("/update", logic.UserLogic.UpdateDetailed)       // 修改用户信息接口
+		detailedGroup.POST("/updateHeadPic", logic.UserLogic.UpdateHeadPic) // 修改用户头像接口
 	}
 
 }

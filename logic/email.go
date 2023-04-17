@@ -43,11 +43,11 @@ func (e *emailLogic) SendCheckCode(ctx *gin.Context) {
 			lib.ServerResult(ctx, 400, "当前邮箱已经被注册,请勿重复注册", nil, nil)
 			return
 		}
-		code, err := e.emailRegister(req.Email)
+		uid, err := e.emailRegister(req.Email)
 		if !lib.ServerFail(ctx, err) {
 			return
 		}
-		lib.ServerSuccess(ctx, "发送成功", code)
+		lib.ServerSuccess(ctx, "发送成功", uid)
 	case "login":
 		ok, err := store.UserStore.EmailRepeat(req.Email)
 		if !lib.ServerFail(ctx, err) {
@@ -57,17 +57,17 @@ func (e *emailLogic) SendCheckCode(ctx *gin.Context) {
 			lib.ServerResult(ctx, 400, "当前邮箱未注册", nil, nil)
 			return
 		}
-		code, err := e.emailLogin(req.Email)
+		uid, err := e.emailLogin(req.Email)
 		if !lib.ServerFail(ctx, err) {
 			return
 		}
-		lib.ServerSuccess(ctx, "发送成功", code)
+		lib.ServerSuccess(ctx, "发送成功", uid)
 	case "update":
-		code, err := e.emailRegister(req.Email)
+		uid, err := e.emailRegister(req.Email)
 		if !lib.ServerFail(ctx, err) {
 			return
 		}
-		lib.ServerSuccess(ctx, "发送成功", code)
+		lib.ServerSuccess(ctx, "发送成功", uid)
 	default:
 		lib.ServerResult(ctx, 400, "参数错误", nil, errors.New("未知的邮件推送请求"))
 	}

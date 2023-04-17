@@ -21,19 +21,18 @@ var SystemDictionaryLogic ISystemDictionaryLogic = (*systemDictionaryLogic)(nil)
 type (
 	// systemDictionaryInsertRequest 字典写入请求结构体
 	systemDictionaryInsertRequest struct {
-		Name        string `json:"name" form:"name" uri:"name" binding:"required"`      // Name name 名称
-		Group       string `json:"group" form:"group" uri:"group" binding:"required"`   // Group group 组名
-		ParentGroup string `json:"parent_group" form:"parent_group" uri:"parent_group"` // ParentGroup parent_group 上级组名
-		Describe    string `json:"describe" form:"describe" uri:"describe"`             // Describe describe 描述
-		Val         string `json:"val" form:"val" uri:"val" binding:"required"`         // Val val 值
-		CreateBy    string `json:"create_by" form:"create_by" uri:"create_by"`          // CreateBy create_by 创建人id
+		Name        string `json:"name" form:"name" uri:"name" binding:"required"`    // Name name 名称
+		Group       string `json:"group" form:"group" uri:"group" binding:"required"` // Group group 组名
+		ParentGroup string `json:"parentGroup" form:"parentGroup" uri:"parentGroup"`  // ParentGroup parent_group 上级组名
+		Describe    string `json:"describe" form:"describe" uri:"describe"`           // Describe describe 描述
+		Val         string `json:"val" form:"val" uri:"val" binding:"required"`       // Val val 值
 	}
 
 	systemDictionaryBatchRequest []systemDictionaryInsertRequest // 字典批量写入
 )
 
 // ToModels 转换成字典结构体列表
-func (ts systemDictionaryBatchRequest) ToModels() ([]model.SystemDictionary, error) {
+func (ts systemDictionaryBatchRequest) ToModels(createBy string) ([]model.SystemDictionary, error) {
 	result := make([]model.SystemDictionary, 0)
 	for i := range ts {
 		t := ts[i]
@@ -57,7 +56,8 @@ func (ts systemDictionaryBatchRequest) ToModels() ([]model.SystemDictionary, err
 			ParentGroup: t.ParentGroup,
 			Describe:    t.Describe,
 			Val:         t.Val,
-			CreateBy:    t.CreateBy,
+			CreateBy:    createBy,
+			CreateTime:  model.JsonTimeNow(),
 		})
 	}
 	return result, nil
@@ -80,7 +80,14 @@ func (*systemDictionaryLogic) Inserts(ctx *gin.Context) {
 		return
 	}
 
-	models, err := req.ToModels()
+	obj, ok := ctx.Get("token")
+	if !ok {
+		lib.ServerResult(ctx, 500, "获取登录信息失败", nil, nil)
+		return
+	}
+	mo := obj.(*store.UserStoreModel)
+
+	models, err := req.ToModels(mo.AccountInfo.ID)
 	if !lib.ServerFailf(ctx, 400, "参数错误", err) {
 		return
 	}

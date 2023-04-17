@@ -1,0 +1,27 @@
+###
+GET http://localhost:8080/dict/findByGroup?group=USER_VIP
+
+###
+POST http://localhost:8080/dict/inserts
+Content-Type: application/json
+token: 920A82C30B1444568BD976C3783271AE
+
+[{
+    "name": "长沙",
+    "group": "CITY_GROUP",
+    "parentGroup": "PROVINCE_GROUP",
+    "describe": "湖南省长沙市",
+    "val": "001"
+},{
+    "name": "株洲",
+    "group": "CITY_GROUP",
+    "parentGroup": "PROVINCE_GROUP",
+    "describe": "湖南省株洲市",
+    "val": "002"
+},{
+    "name": "湘潭",
+    "group": "CITY_GROUP",
+    "parentGroup": "PROVINCE_GROUP",
+    "describe": "湖南省湘潭市",
+    "val": "003"
+}]

@@ -66,3 +66,39 @@ func TestInsert(t *testing.T) {
 	}
 	fmt.Println(util.ToJSON(result))
 }
+
+func TestDist(t *testing.T) {
+	Runner()
+	ls, err := store.SystemDictionaryStore.FindByGroup("USER_VIP")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(util.ToJSON(ls))
+}
+
+func TestLogin(t *testing.T) {
+	Runner()
+	email := "miajio@163.com"
+	password := "123456"
+
+	userAccountInfo, err := store.UserStore.FindAccountByEmailAndPwd(email, password)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tokenKey, err := store.UserTokenStore.LoginSave(userAccountInfo.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("登录成功", tokenKey)
+}
+
+func TestGet(t *testing.T) {
+	Runner()
+
+	key := "920A82C30B1444568BD976C3783271AE"
+	obj, err := store.UserTokenStore.Get(key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(util.ToJSON(obj))
+}

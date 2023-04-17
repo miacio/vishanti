@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/gin-gonic/gin"
 	"github.com/miacio/varietas/util"
 	"github.com/miacio/vishanti/lib"
 	"github.com/miacio/vishanti/model"
@@ -64,4 +65,13 @@ func (*userTokenStore) Get(key string) (*UserStoreModel, error) {
 	var result UserStoreModel
 	err = json.Unmarshal([]byte(msg), &result)
 	return &result, err
+}
+
+func TokenGet(ctx *gin.Context) (*UserStoreModel, bool) {
+	obj, ok := ctx.Get("token")
+	if !ok {
+		lib.ServerResult(ctx, 500, "获取登录信息失败", nil, nil)
+		return nil, false
+	}
+	return obj.(*UserStoreModel), ok
 }

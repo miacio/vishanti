@@ -197,6 +197,10 @@ func (se *SQLEngine[T]) Select(columns ...string) *SQLEngine[T] {
 	return se
 }
 
+func (se *SQLEngine[T]) Count() *SQLEngine[T] {
+	return se.Select("count(1)")
+}
+
 // Update update语句生成器
 // 此方法执行时如果update语句没有where条件将会抛出错误
 func (se *SQLEngine[T]) Update() *SQLEngine[T] {

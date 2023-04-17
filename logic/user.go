@@ -17,6 +17,7 @@ type IUserLogic interface {
 	EmailLoginPwd(ctx *gin.Context) // EmailLoginPwd 邮箱登录 密码登录方式
 
 	UpdateDetailed(ctx *gin.Context) // UpdateDetailed 修改用户信息
+	UpdateHeadPic(ctx *gin.Context)  // UpdateHeadPic 修改用户头像
 }
 
 var UserLogic IUserLogic = (*userLogic)(nil)
@@ -121,7 +122,6 @@ func (*userLogic) EmailLoginPwd(ctx *gin.Context) {
 
 // updateUserDetailRequest 修改用户信息请求结构体
 type updateUserDetailRequest struct {
-	HeadPicID     string `form:"headPicId" json:"headPicId" uri:"headPicId"`             // headPicId
 	NickName      string `form:"nickName" json:"nickName" uri:"nickName"`                // nickName
 	Sex           string `form:"sex" json:"sex" uri:"sex"`                               // sex
 	BirthdayYear  int    `form:"birthdayYear" json:"birthdayYear" uri:"birthdayYear"`    // birthdayYear
@@ -133,7 +133,6 @@ func (u *updateUserDetailRequest) ToModel(id, accountId string) model.UserDetail
 	return model.UserDetailedInfo{
 		ID:            id,
 		UserAccountID: accountId,
-		HeadPicID:     u.HeadPicID,
 		NickName:      u.NickName,
 		Sex:           u.Sex,
 		BirthdayYear:  u.BirthdayYear,
@@ -149,16 +148,36 @@ func (*userLogic) UpdateDetailed(ctx *gin.Context) {
 		return
 	}
 
-	obj, ok := ctx.Get("token")
+	mo, ok := store.TokenGet(ctx)
 	if !ok {
-		lib.ServerResult(ctx, 500, "获取登录信息失败", nil, nil)
 		return
 	}
-	mo := obj.(store.UserStoreModel)
 
 	if err := store.UserStore.UpdateDetailed(req.ToModel(mo.AccountInfo.ID, mo.DetailedInfo.ID)); err != nil {
 		lib.ServerResult(ctx, 500, "修改用户信息失败", nil, err)
 		return
 	}
 	lib.ServerSuccess(ctx, "修改成功", nil)
+}
+
+// updateDetailedHeadPicRequest 修改头像请求参数
+type updateDetailedHeadPicRequest struct {
+	File     []byte `form:"file" json:"file" binding:"required"`         // 文件内容 base64转码字节数组
+	FileName string `form:"fileName" json:"fileName" binding:"required"` // 文件名称
+	FileMD5  string `form:"fileMD5" json:"fileMD5" binding:"required"`   // 文件MD5加密后值
+}
+
+// UpdateHeadPic 修改用户头像
+func (*userLogic) UpdateHeadPic(ctx *gin.Context) {
+	var req updateDetailedHeadPicRequest
+	if !lib.ShouldBindJSON(ctx, &req) {
+		return
+	}
+
+	_, ok := store.TokenGet(ctx)
+	if !ok {
+		return
+	}
+
+	// mo.AccountInfo.ID
 }
