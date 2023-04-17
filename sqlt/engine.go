@@ -1,12 +1,24 @@
 package sqlt
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
+)
+
+// 操作类型
+type optionType int
+
+const (
+	_      optionType = iota
+	SELECT            // 查询
+	UPDATE            // 修改
+	DELETE            // 删除
+	INSERT            // 新增
 )
 
 type TableObject interface {
@@ -34,13 +46,34 @@ type SQLEngine[T TableObject] struct {
 	db          *sqlx.DB // sqlx db 用于直接操作数据库
 	whereClause []Clause // where子句
 	setClause   []Clause // set子句
+
+	optionType  optionType // 操作类型
+	optionError error      // 执行操作类型时产生的错误
+
+	sql    string        // 生成的sql语句
+	params []interface{} // 参数集
 }
 
 func NewSQLEngine[T TableObject](db *sqlx.DB) *SQLEngine[T] {
 	return &SQLEngine[T]{
 		db:          db,
 		whereClause: make([]Clause, 0),
+		setClause:   make([]Clause, 0),
+		optionType:  0,
+		optionError: nil,
+		sql:         "",
+		params:      make([]interface{}, 0),
 	}
+}
+
+func (se *SQLEngine[T]) Clear() *SQLEngine[T] {
+	se.whereClause = make([]Clause, 0)
+	se.setClause = make([]Clause, 0)
+	se.optionType = 0
+	se.optionError = nil
+	se.sql = ""
+	se.params = make([]interface{}, 0)
+	return se
 }
 
 // whereAppend
@@ -138,74 +171,112 @@ func (se *SQLEngine[T]) set() (string, []interface{}) {
 }
 
 // Select select语句生成器
-func (se *SQLEngine[T]) Select(columns ...string) (string, []interface{}) {
-	sqlTemp := "SELECT %s FROM %s"
-	var sql string
-	if columns == nil {
-		columns = se.extractColumn("db", true)
-	}
-	if columns != nil {
-		sql = fmt.Sprintf(sqlTemp, strings.Join(columns, ","), se.to.TableName())
-	} else {
-		sql = fmt.Sprintf(sqlTemp, "*", se.to.TableName())
-	}
+func (se *SQLEngine[T]) Select(columns ...string) *SQLEngine[T] {
+	if se.optionType == 0 && se.optionError == nil {
+		sqlTemp := "SELECT %s FROM %s"
+		var sql string
+		if columns == nil {
+			columns = se.extractColumn("db", true)
+		}
+		if columns != nil {
+			sql = fmt.Sprintf(sqlTemp, strings.Join(columns, ","), se.to.TableName())
+		} else {
+			sql = fmt.Sprintf(sqlTemp, "*", se.to.TableName())
+		}
 
-	where, params := se.where()
-	if where != "" {
-		sql = sql + " WHERE " + where
+		where, params := se.where()
+		if where != "" {
+			sql = sql + " WHERE " + where
+		}
+		se.sql = sql
+		se.params = params
+		se.optionType = SELECT
+	} else {
+		se.optionError = errors.New("sql engine only option error")
 	}
-	return sql, params
+	return se
 }
 
 // Update update语句生成器
 // 此方法执行时如果update语句没有where条件将会抛出错误
-func (se *SQLEngine[T]) Update() (string, []interface{}, error) {
-	sqlTemp := "UPDATE %s SET %s WHERE %s"
-	params := make([]interface{}, 0)
-	setSql, setParams := se.set()
-	if setSql == "" {
-		return "", nil, errors.New("no update column")
+func (se *SQLEngine[T]) Update() *SQLEngine[T] {
+	if se.optionType == 0 && se.optionError == nil {
+		sqlTemp := "UPDATE %s SET %s WHERE %s"
+		params := make([]interface{}, 0)
+		setSql, setParams := se.set()
+		if setSql == "" {
+			se.optionError = errors.New("no update column")
+			return se
+		}
+		whereSql, whereParams := se.where()
+		if whereSql == "" {
+			se.optionError = errors.New("where clause is empty")
+			return se
+		}
+		params = append(params, setParams...)
+		params = append(params, whereParams...)
+		sql := fmt.Sprintf(sqlTemp, se.to.TableName(), setSql, whereSql)
+		se.sql = sql
+		se.params = params
+		se.optionType = UPDATE
+	} else {
+		se.optionError = errors.New("sql engine only option error")
 	}
-	whereSql, whereParams := se.where()
-	if whereSql == "" {
-		return "", nil, errors.New("where clause is empty")
-	}
-	params = append(params, setParams...)
-	params = append(params, whereParams...)
-	sql := fmt.Sprintf(sqlTemp, se.to.TableName(), setSql, whereSql)
-	return sql, params, nil
+	return se
 }
 
 // Delete delete语句生成器
 // 此方法执行时如果delete语句没有where条件将会抛出错误
-func (se *SQLEngine[T]) Delete() (string, []interface{}, error) {
-	sqlTemp := "DELETE FROM %s WHERE %s"
-	params := make([]interface{}, 0)
-	whereSql, whereParams := se.where()
-	if whereSql == "" {
-		return "", nil, errors.New("where clause is empty")
+func (se *SQLEngine[T]) Delete() *SQLEngine[T] {
+	if se.optionType == 0 && se.optionError == nil {
+		sqlTemp := "DELETE FROM %s WHERE %s"
+		params := make([]interface{}, 0)
+		whereSql, whereParams := se.where()
+		if whereSql == "" {
+			se.optionError = errors.New("where clause is empty")
+			return se
+		}
+		params = append(params, whereParams...)
+		se.sql = fmt.Sprintf(sqlTemp, se.to.TableName(), whereSql)
+		se.params = params
+		se.optionType = DELETE
+	} else {
+		se.optionError = errors.New("sql engine only option error")
 	}
-	params = append(params, whereParams...)
-	sql := fmt.Sprintf(sqlTemp, se.to.TableName(), whereSql)
-	return sql, params, nil
+	return se
 }
 
 // Insert insert named语句生成器(允许生成批量插入)
 // 此方法依据tag获取字段名称,并将依据此tag的值设定为列名进行插入语句生成
-func (se *SQLEngine[T]) InsertNamed(tag string) (string, error) {
-	sqlTemp := "INSERT INTO %s (%s) VALUES (%s)"
+func (se *SQLEngine[T]) InsertNamed(tag string, objs ...T) *SQLEngine[T] {
+	if se.optionType == 0 && se.optionError == nil {
+		sqlTemp := "INSERT INTO %s (%s) VALUES (%s)"
 
-	columns := se.extractColumn(tag, false)
-	if columns == nil {
-		return "", errors.New("columns is not found")
+		columns := se.extractColumn(tag, false)
+		if columns == nil {
+			se.optionError = errors.New("columns is not found")
+			return se
+		}
+		valColumns := make([]string, 0)
+		for i := range columns {
+			valColumns = append(valColumns, ":"+columns[i])
+			columns[i] = keywordTo(columns[i])
+		}
+		se.sql = fmt.Sprintf(sqlTemp, se.to.TableName(), strings.Join(columns, ","), strings.Join(valColumns, ","))
+		se.params = make([]interface{}, 0)
+		for i := range objs {
+			param, err := ObjectToTagMap(objs[i], tag)
+			if err != nil {
+				se.optionError = err
+				return se
+			}
+			se.params = append(se.params, param)
+		}
+		se.optionType = INSERT
+	} else {
+		se.optionError = errors.New("sql engine only option error")
 	}
-	valColumns := make([]string, 0)
-	for i := range columns {
-		valColumns = append(valColumns, ":"+columns[i])
-		columns[i] = keywordTo(columns[i])
-	}
-	sql := fmt.Sprintf(sqlTemp, se.to.TableName(), strings.Join(columns, ","), strings.Join(valColumns, ","))
-	return sql, nil
+	return se
 }
 
 func (se *SQLEngine[T]) extractColumn(tag string, keyword bool) []string {
@@ -230,4 +301,41 @@ func (se *SQLEngine[T]) extractColumn(tag string, keyword bool) []string {
 		}
 	}
 	return result
+}
+
+func (se *SQLEngine[T]) Get(obj any, columns ...string) error {
+	if se.optionError != nil {
+		return se.optionError
+	}
+	if se.optionType == SELECT {
+		return se.db.Get(obj, se.sql, se.params...)
+	}
+	return errors.New("unknown option type")
+}
+
+func (se *SQLEngine[T]) Find(obj any, columns ...string) error {
+	if se.optionError != nil {
+		return se.optionError
+	}
+	if se.optionType == SELECT {
+		return se.db.Select(obj, se.sql, se.params...)
+	}
+	return errors.New("unknown option type")
+}
+
+func (se *SQLEngine[T]) Exec() (sql.Result, error) {
+	if se.optionError != nil {
+		return nil, se.optionError
+	}
+	switch se.optionType {
+	case UPDATE, DELETE:
+		return se.db.Exec(se.sql, se.params...)
+	case INSERT:
+		return se.db.NamedExec(se.sql, se.params)
+	}
+	return nil, errors.New("unknow option type")
+}
+
+func (se *SQLEngine[T]) Value() (string, []interface{}, error) {
+	return se.sql, se.params, se.optionError
 }

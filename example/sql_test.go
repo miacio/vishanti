@@ -38,16 +38,11 @@ func TestSQL(t *testing.T) {
 
 func TestInsert(t *testing.T) {
 	Runner()
-	se := sqlt.NewSQLEngine[model.UserAccountInfo](nil)
-	sql, err := se.InsertNamed("db")
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(sql)
-
+	se := sqlt.NewSQLEngine[model.UserAccountInfo](lib.DB)
 	te := time.Now()
 	jt := model.JsonTime(te)
-	val, err := sqlt.ObjectToTagMap(model.UserAccountInfo{
+
+	sql, param, err := se.InsertNamed("db", model.UserAccountInfo{
 		ID:         lib.UID(),
 		Mobile:     "18570088134",
 		Email:      "29160047@qq.com",
@@ -55,12 +50,15 @@ func TestInsert(t *testing.T) {
 		Password:   util.MD5([]byte("123456")),
 		CreateTime: &jt,
 		Status:     "1",
-	}, "db")
+	}).Value()
+
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(val)
-	_, err = lib.DB.NamedExec(sql, val)
+
+	fmt.Println(sql)
+	fmt.Println(param)
+	_, err = se.Exec()
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -14,14 +14,14 @@ import (
 func TestSelect(t *testing.T) {
 	se := sqlt.NewSQLEngine[model.UserAccountInfo](nil)
 	se.And("mobile = ? and password = MD5(?)", "18616220047", "123456").Or("id = ?", "123456")
-	sql, params := se.Select("count(1)")
+	sql, params, _ := se.Select("count(1)").Value()
 	fmt.Println(sql, params)
 }
 
 func TestUpdate(t *testing.T) {
 	se := sqlt.NewSQLEngine[model.UserAccountInfo](nil)
 	se.Set("mobile = ?", "18570088134").Set("password = MD5(?)", "654321")
-	sql, params, err := se.And("id = ?", "123456").Update()
+	sql, params, err := se.And("id = ?", "123456").Update().Value()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,7 +30,7 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	se := sqlt.NewSQLEngine[model.UserAccountInfo](nil)
-	sql, params, err := se.Where("id = ?", "123456").Or("id = ?", "654321").Delete()
+	sql, params, err := se.Where("id = ?", "123456").Or("id = ?", "654321").Delete().Value()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,7 +39,7 @@ func TestDelete(t *testing.T) {
 
 func TestInsert(t *testing.T) {
 	se := sqlt.NewSQLEngine[model.UserAccountInfo](nil)
-	sql, err := se.InsertNamed("db")
+	sql, _, err := se.InsertNamed("db").Value()
 	if err != nil {
 		t.Fatal(err)
 	}
