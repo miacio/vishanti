@@ -307,8 +307,13 @@ func (se *SQLEngine[T]) Get(obj any, columns ...string) error {
 	if se.optionError != nil {
 		return se.optionError
 	}
+	if se.optionType == 0 {
+		se.Select(columns...)
+	}
 	if se.optionType == SELECT {
-		return se.db.Get(obj, se.sql, se.params...)
+		err := se.db.Get(obj, se.sql, se.params...)
+		se.Clear()
+		return err
 	}
 	return errors.New("unknown option type")
 }
@@ -317,8 +322,13 @@ func (se *SQLEngine[T]) Find(obj any, columns ...string) error {
 	if se.optionError != nil {
 		return se.optionError
 	}
+	if se.optionType == 0 {
+		se.Select(columns...)
+	}
 	if se.optionType == SELECT {
-		return se.db.Select(obj, se.sql, se.params...)
+		err := se.db.Select(obj, se.sql, se.params...)
+		se.Clear()
+		return err
 	}
 	return errors.New("unknown option type")
 }
@@ -327,11 +337,17 @@ func (se *SQLEngine[T]) Exec() (sql.Result, error) {
 	if se.optionError != nil {
 		return nil, se.optionError
 	}
+	var result sql.Result
+	var err error
 	switch se.optionType {
 	case UPDATE, DELETE:
-		return se.db.Exec(se.sql, se.params...)
+		result, err = se.db.Exec(se.sql, se.params...)
+		se.Clear()
+		return result, err
 	case INSERT:
-		return se.db.NamedExec(se.sql, se.params)
+		result, err = se.db.NamedExec(se.sql, se.params)
+		se.Clear()
+		return result, err
 	}
 	return nil, errors.New("unknow option type")
 }

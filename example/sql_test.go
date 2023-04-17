@@ -42,24 +42,27 @@ func TestInsert(t *testing.T) {
 	te := time.Now()
 	jt := model.JsonTime(te)
 
-	sql, param, err := se.InsertNamed("db", model.UserAccountInfo{
-		ID:         lib.UID(),
+	id := lib.UID()
+
+	res, err := se.InsertNamed("db", model.UserAccountInfo{
+		ID:         id,
 		Mobile:     "18570088134",
 		Email:      "29160047@qq.com",
 		Account:    "29160047",
 		Password:   util.MD5([]byte("123456")),
 		CreateTime: &jt,
 		Status:     "1",
-	}).Value()
+	}).Exec()
 
 	if err != nil {
 		t.Fatal(err)
 	}
+	fmt.Println(res.RowsAffected())
 
-	fmt.Println(sql)
-	fmt.Println(param)
-	_, err = se.Exec()
+	var result model.UserAccountInfo
+	err = se.Where("id = ?", id).Get(&result)
 	if err != nil {
 		t.Fatal(err)
 	}
+	fmt.Println(util.ToJSON(result))
 }
