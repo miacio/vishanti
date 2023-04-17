@@ -43,11 +43,10 @@ func (dp *DBCfgParam) DSN() string {
 	return dsn
 }
 
-func (dp *DBCfgParam) Connect() error {
+func (dp *DBCfgParam) Connect() (*sqlx.DB, error) {
 	db, err := sqlx.Connect("mysql", dp.DSN())
 	if err != nil {
-		return err
+		return nil, err
 	}
-	DB = db
-	return nil
+	return db, nil
 }

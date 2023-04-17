@@ -3,6 +3,6 @@ POST http://localhost:8080/email/sendCheckCode
 Content-Type: application/json
 
 {
-    "email": "1877378299@qq.com",
+    "email": "1042894685@qq.com",
     "emailType": "register"
 }

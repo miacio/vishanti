@@ -11,10 +11,16 @@ password="" # redis 密码
 db=0 # 默认连接库
 
 [mysql]
-host="127.0.0.1:3306"
-user="miajio"
-password="123456"
-database="miajiodb"
-charset="utf8mb4"
-parseTime="True"
-loc="Local"
+host="127.0.0.1:3306" # 数据库地址
+user="miajio" # 数据库用户名
+password="123456" # 数据库密码
+database="miajiodb" # 数据库名
+charset="utf8mb4" # 字符集
+parseTime="True" # 是否格式化时间
+loc="Local" # 时区
+
+[minio]
+endPoint="127.0.0.1:9000" #  minio服务器地址 服务ID-地址
+accessKey="Vvw9WyJlGWSBDbKl" #  minio 访问密钥
+secretKey="Z0hXJiVGKKU2CmIqKGIrkrul0hEKYwCg" #  minio 保密密钥
+useSSL=false # minio 服务协议是否使用https

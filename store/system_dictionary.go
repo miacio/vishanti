@@ -72,7 +72,6 @@ func (*systemDictionaryStore) InsertSystemDictionary(systemDictionary model.Syst
 
 	systemDictionary.ID = lib.UID()
 
-	//(:id, :name, :group, :parent_group, :describe, :val, NOW(), :create_by)
 	_, err := lib.DB.NamedExec(sql_system_dictionary_insert, map[string]interface{}{
 		"id":           systemDictionary.ID,
 		"name":         systemDictionary.Name,

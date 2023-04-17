@@ -1,4 +1,4 @@
-package example_test
+package sqlt_test
 
 import (
 	"fmt"
@@ -9,35 +9,35 @@ import (
 	"github.com/miacio/vishanti/lib"
 	"github.com/miacio/vishanti/model"
 	"github.com/miacio/vishanti/sqlt"
-	"github.com/miacio/vishanti/store"
 )
 
-func TestSQL(t *testing.T) {
-	Runner()
-	userAccountInfo, err := store.UserStore.FindAccountByEmailAndPwd("miajio@163.com", "123456")
-	if err != nil {
-		t.Fatal(err)
-	}
-	userDetailesInfo, err := store.UserStore.FindDetailedByUserId(userAccountInfo.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	status, err := store.SystemDictionaryStore.FindGroupAndValByName("USER_ACCESS_STATUS", userAccountInfo.Status)
-	if err != nil {
-		t.Fatal(err)
-	}
+func TestSelect(t *testing.T) {
+	se := sqlt.NewSQLEngine[model.UserAccountInfo](nil)
+	se.And("mobile = ? and password = MD5(?)", "18616220047", "123456").Or("id = ?", "123456")
+	sql, params := se.Select("count(1)")
+	fmt.Println(sql, params)
+}
 
-	vip, err := store.SystemDictionaryStore.FindGroupAndValByName("USER_VIP", userDetailesInfo.Vip)
+func TestUpdate(t *testing.T) {
+	se := sqlt.NewSQLEngine[model.UserAccountInfo](nil)
+	se.Set("mobile = ?", "18570088134").Set("password = MD5(?)", "654321")
+	sql, params, err := se.And("id = ?", "123456").Update()
 	if err != nil {
 		t.Fatal(err)
 	}
+	fmt.Println(sql, params)
+}
 
-	fmt.Println("当前用户状态为:", status)
-	fmt.Println("当前用户会员等级为:", vip)
+func TestDelete(t *testing.T) {
+	se := sqlt.NewSQLEngine[model.UserAccountInfo](nil)
+	sql, params, err := se.Where("id = ?", "123456").Or("id = ?", "654321").Delete()
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(sql, params)
 }
 
 func TestInsert(t *testing.T) {
-	Runner()
 	se := sqlt.NewSQLEngine[model.UserAccountInfo](nil)
 	sql, err := se.InsertNamed("db")
 	if err != nil {
@@ -60,8 +60,4 @@ func TestInsert(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println(val)
-	_, err = lib.DB.NamedExec(sql, val)
-	if err != nil {
-		t.Fatal(err)
-	}
 }

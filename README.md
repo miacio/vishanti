@@ -34,11 +34,11 @@ build.bat
 // bin目录下新建一个config.toml文件,然后写入下述内容
 
 [email]
-name="" # 发送者邮件名称 xxx@mail.com的 xxx
-mailAddr="" # 发送者邮件地址 xxx@mail.com
-smtpAddr="" # 邮箱服务器(带端口协议) 例如: smtp.163.com:25
-hostAddr="" # 邮箱服务器(不带端口协议) 例如: smtp.163.com
-password="" # 邮箱授权码
+name="miajio" # 发送者邮件名称
+mailAddr="miajio@163.com" # 发送者邮件地址
+smtpAddr="smtp.163.com:25"
+hostAddr="smtp.163.com"
+password="XXXXXXXXXXXXXXX" # 邮箱授权码
 
 [redis]
 host="127.0.0.1:6379" # redis 服务器地址
@@ -47,12 +47,18 @@ db=0 # 默认连接库
 
 [mysql]
 host="127.0.0.1:3306" # 数据库地址
-user="" # 数据库用户名
+user="miajio" # 数据库用户名
 password="123456" # 数据库密码
-database="" # 数据库名
-charset="utf8mb4" # 数据库字符集
-parseTime="True" # 是否分析时间 True或不给参数
-loc="Local" # 时间地址
+database="miajiodb" # 数据库名
+charset="utf8mb4" # 字符集
+parseTime="True" # 是否格式化时间
+loc="Local" # 时区
+
+[minio]
+endPoint="127.0.0.1:9000" #  minio服务器地址 服务ID-地址
+accessKey="Vvw9WyJlGWSBDbKl" #  minio 访问密钥
+secretKey="Z0hXJiVGKKU2CmIqKGIrkrul0hEKYwCg" #  minio 保密密钥
+useSSL=false # minio 服务协议是否使用https
 ```
 
 ### 运行

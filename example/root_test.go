@@ -53,19 +53,34 @@ func initConfig() {
 		lib.RedisClient = lib.RedisCfg.NewClient()
 	}
 
+	// MySQL 服务
 	if err := v.UnmarshalKey("mysql", &lib.DBCfg); err != nil {
 		lib.Log.Errorf("数据库配置读取失败: %v", err)
 		os.Exit(0)
 	} else {
-		if err := lib.DBCfg.Connect(); err != nil {
+		db, err := lib.DBCfg.Connect()
+		if err != nil {
 			lib.Log.Errorf("数据库连接失败: %v", err)
 			os.Exit(0)
 		}
+		lib.DB = db
+	}
+
+	// Minio 服务
+	if err := v.UnmarshalKey("minio", &lib.MinioCfg); err != nil {
+		lib.Log.Errorf("数据库配置读取失败: %v", err)
+		os.Exit(0)
+	} else {
+		client, err := lib.MinioCfg.Connect()
+		if err != nil {
+			lib.Log.Errorf("minio连接失败: %v", err)
+			os.Exit(0)
+		}
+		lib.MinioClient = client
 	}
 }
 
-// 初始化方法运行
-func start() {
+func Runner() {
 	initLog()
 	initTrans()
 	initConfig()
