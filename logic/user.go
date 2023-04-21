@@ -1,6 +1,10 @@
 package logic
 
 import (
+	"fmt"
+	"path/filepath"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/miacio/vishanti/lib"
 	"github.com/miacio/vishanti/model"
@@ -160,24 +164,66 @@ func (*userLogic) UpdateDetailed(ctx *gin.Context) {
 	lib.ServerSuccess(ctx, "修改成功", nil)
 }
 
-// updateDetailedHeadPicRequest 修改头像请求参数
-type updateDetailedHeadPicRequest struct {
-	File     []byte `form:"file" json:"file" binding:"required"`         // 文件内容 base64转码字节数组
-	FileName string `form:"fileName" json:"fileName" binding:"required"` // 文件名称
-	FileMD5  string `form:"fileMD5" json:"fileMD5" binding:"required"`   // 文件MD5加密后值
-}
-
 // UpdateHeadPic 修改用户头像
 func (*userLogic) UpdateHeadPic(ctx *gin.Context) {
-	var req updateDetailedHeadPicRequest
-	if !lib.ShouldBindJSON(ctx, &req) {
+	var req fileDefaultUploadRequest
+	err := formFileDefaultUploadRequest(ctx, &req)
+	if !lib.ServerFail(ctx, err) {
 		return
 	}
 
-	_, ok := store.TokenGet(ctx)
+	mo, ok := store.TokenGet(ctx)
 	if !ok {
 		return
 	}
+	objTmpl := "%s/USER_HEAD_PIC/%s"
+	suffix := filepath.Ext(filepath.Base(req.File.Filename))
+	switch strings.ToLower(suffix) {
+	case ".jpg", ".jpeg", ".png", ".svg", ".webp":
+	default:
+		lib.ServerResult(ctx, 400, "文件格式错误,无法上传,目前仅支持[jpg,jpeg,png,svg,webp]文件格式作为头像", nil, nil)
+		return
+	}
 
-	// mo.AccountInfo.ID
+	fileName := strings.Join([]string{lib.UID(), suffix}, "")
+
+	objectName := fmt.Sprintf(objTmpl, mo.AccountInfo.ID, fileName)
+
+	fileSize := req.File.Size
+
+	mf, err := req.File.Open()
+	if !lib.ServerFail(ctx, err) {
+		return
+	}
+	defer mf.Close()
+
+	err = lib.Minio.PutObject(lib.MinioCfg.Bucket, req.Region, objectName, mf, -1)
+	if !lib.ServerFail(ctx, err) {
+		return
+	}
+
+	systemFileInfoModel := model.SystemFileInfo{
+		ID:         lib.UID(),
+		FileName:   req.File.Filename,
+		ObjectName: objectName,
+		Region:     req.Region,
+		Bucket:     lib.MinioCfg.Bucket,
+		FileSize:   fileSize,
+		FileMd5:    req.MD5,
+		CreateTime: model.JsonTimeNow(),
+		CreateBy:   mo.AccountInfo.ID,
+		Used:       0,
+	}
+
+	err = store.SystemFileStore.Insert(systemFileInfoModel)
+	if !lib.ServerFail(ctx, err) {
+		return
+	}
+
+	// systemFileInfoModel.ID
+	if err := store.UserStore.UpdateUserHeadPic(mo.AccountInfo.ID, systemFileInfoModel.ID); err != nil {
+		lib.ServerFail(ctx, err)
+		return
+	}
+	lib.ServerSuccess(ctx, "修改成功", systemFileInfoModel.ID)
 }

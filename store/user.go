@@ -21,6 +21,7 @@ type IUserStore interface {
 	FindAccountById(id string) (*model.UserAccountInfo, error)                       // 依据用户账号id获取用户信息
 	FindDetailedByUserId(id string) (*model.UserDetailedInfo, error)                 // 依据用户id获取用户信息
 	UpdateDetailed(userDetailedInfo model.UserDetailedInfo) error                    // 修改用户信息
+	UpdateUserHeadPic(userAccountId string, headPicId string) error                  // 修改用户头像
 }
 
 var UserStore IUserStore = (*userStore)(nil)
@@ -148,5 +149,14 @@ func (*userStore) UpdateDetailed(userDetailedInfo model.UserDetailedInfo) error 
 	if err == nil {
 		lib.Log.Infof("%s进行修改用户信息操作\n 原数据为: %s", userDetailedInfo.UserAccountID, util.ToJSON(oldUserDetailedInfo))
 	}
+	return err
+}
+
+// 修改用户头像
+// userAccountId 用户账号id
+// headPicId 修改后的头像id
+func (*userStore) UpdateUserHeadPic(userAccountId string, headPicId string) error {
+	se := sqlt.NewSQLEngine[model.UserDetailedInfo](lib.DB)
+	_, err := se.Set("head_pic_id = ?", headPicId).Where("user_account_id = ?", userAccountId).Update().Exec()
 	return err
 }

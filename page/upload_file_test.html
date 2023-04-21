@@ -8,11 +8,18 @@
     </head>
     <body>
         <h1>upload file test</h1>
-            token: <input id="token" value="4F00499AB963499F8282C2E7F227561E" type="text" name="token"> <br>
-            region: <input id="region" value="miajio" type="text" name="region"> <br>
-            File: <input id="file" type="file" name="file"><br>
-            MD5: <input id="md5" type="text" name="md5"><br>
-            <input type="button" value="submit" id="subbt">
+        token: <input id="token" value="4F00499AB963499F8282C2E7F227561E" type="text" name="token"> <br>
+        region: <input id="region" value="miajio" type="text" name="region"> <br>
+        File: <input id="file" type="file" name="file"><br>
+        MD5: <input id="md5" type="text" name="md5"><br>
+        <input type="button" value="submit" id="subbt">
+
+        <h2>test load image file</h2>
+        fileId: <input id="fileId" value="" type="text"><br>
+        <input type="button" value="getFile" id="getFile"><br>
+        <img id="imgFile" src=""/>
+
+
         <script>
             document.getElementById('file').addEventListener('change', e => {
                 const file = e.target.files[0];
@@ -37,7 +44,8 @@
                     data.append("file", $("#file").prop("files")[0]);
 
                     $.ajax({
-                        url: "/file/upload",
+                        url: "/user/detailed/updateHeadPic",
+                        // url: "/file/upload",
                         type: "POST",
                         data: data,
                         cache: false,
@@ -47,13 +55,20 @@
                             req.setRequestHeader("token", $("#token").val());
                         },
                         success: function(data) {
+                            console.log(data);
                             console.log(data.data);
                             
                         }
                     });
                 }
 
+                function fileLoad() {
+                    $("#imgFile").attr("src", "/file/load?id=" + $("#fileId").val())
+                }
+
                 $("#subbt").click(fileUpload)
+
+                $("#getFile").click(fileLoad)
             })
         </script>
     </body>

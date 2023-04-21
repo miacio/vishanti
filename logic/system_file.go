@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -73,8 +75,10 @@ func (*systemFileLogic) Upload(ctx *gin.Context) {
 		return
 	}
 
-	objTmpl := "files/%s/%d/%s"
-	fileName := req.File.Filename
+	objTmpl := "%s/USER_FILES/%d/%s"
+	suffix := filepath.Ext(filepath.Base(req.File.Filename))
+	fileName := strings.Join([]string{lib.UID(), suffix}, "")
+
 	objectName := fmt.Sprintf(objTmpl, mo.AccountInfo.ID, time.Now().UnixMicro(), fileName)
 	fileSize := req.File.Size
 
@@ -91,7 +95,7 @@ func (*systemFileLogic) Upload(ctx *gin.Context) {
 
 	systemFileInfoModel := model.SystemFileInfo{
 		ID:         lib.UID(),
-		FileName:   fileName,
+		FileName:   req.File.Filename,
 		ObjectName: objectName,
 		Region:     req.Region,
 		Bucket:     lib.MinioCfg.Bucket,

@@ -87,6 +87,31 @@ body:
 }
 ```
 
+## 文件服务
+### 文件上传接口
+接口地址: /file/upload
+
+请求方式: POST
+
+请求参数: 
+header: token = 登录授权id
+
+form表单参数: 
+```
+{
+    "region": "beijing", // 基于业务的地区 - 用于存储minio使用
+    "md5": "xxxxxxxxx", // 当前文件加密后的md5 用于校验文件的一致性
+    "file": "file 文件"
+}
+
+提交方式前端可参考: page/upload_file_test.html
+```
+
+### 文件下载接口
+接口地址: /file/load?id=文件id
+
+请求方式: GET
+
 ## 邮箱服务
 ### 发送邮件接口
 接口地址: /email/sendCheckCode
@@ -252,26 +277,21 @@ token:
 }
 ```
 
-### 修改用户头像接口 - 开发中
+### 修改用户头像接口(与文件上传模式一致)
 接口地址: /user/detailed/updateHeadPic
 
 请求方式: POST
 
-请求参数:
-```
-token:
+请求参数: 
+header: token = 登录授权id
 
-{
-    "file": 文件base64转码,
-    "fileName": 文件名称,
-    "fileMD5": 文件md5加密后值,
-}
-```
-
-响应:
+form表单参数: 
 ```
 {
-    "code": 200,
-    "msg": "修改成功"
+    "region": "beijing", // 基于业务的地区 - 用于存储minio使用
+    "md5": "xxxxxxxxx", // 当前文件加密后的md5 用于校验文件的一致性
+    "file": "file 文件"
 }
+
+提交方式前端可参考: page/upload_file_test.html
 ```
