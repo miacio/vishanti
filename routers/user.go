@@ -17,9 +17,10 @@ func (*userRouter) Execute(e *gin.Engine) {
 	// 邮箱模块
 	emailGroup := user.Group("/email")
 	{
-		emailGroup.POST("/register", logic.UserLogic.EmailRegister)
-		emailGroup.POST("/login", logic.UserLogic.EmailLogin)
-		emailGroup.POST("/loginPwd", logic.UserLogic.EmailLoginPwd)
+		emailGroup.POST("/register", logic.UserLogic.EmailRegister)   // 用户邮箱注册
+		emailGroup.POST("/login", logic.UserLogic.EmailLogin)         // 用户邮箱登录
+		emailGroup.POST("/loginPwd", logic.UserLogic.EmailLoginPwd)   // 用户邮箱密码方式登录
+		emailGroup.POST("/updatePwd", logic.UserLogic.EmailUpdatePwd) // 用户邮箱修改密码
 	}
 
 	// 用户信息模块

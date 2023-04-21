@@ -250,6 +250,29 @@ form表单参数:
 }
 ```
 
+### 通过邮箱修改密码
+接口地址: /user/email/updatePwd
+
+请求方式: POST
+
+请求参数:
+```
+{
+    "email": "xxxxx@qq.com", // 邮箱地址
+    "password": "password", // 修改后的密码
+    "code": "DB7ZN6", 验证码,
+    "uid": "291A4E0C605D4DEF8FE76ED96E47F005" 邮件id
+}
+```
+
+响应:
+```
+{
+    "code": 200,
+    "msg": "修改成功"
+}
+```
+
 ## 用户信息模块
 ### 修改用户信息接口
 接口地址: /user/detailed/update

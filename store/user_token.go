@@ -77,6 +77,7 @@ func TokenGet(ctx *gin.Context) (*UserStoreModel, bool) {
 	return obj.(*UserStoreModel), ok
 }
 
+// TokenFlush 刷新token内值
 func TokenFlush(ctx *gin.Context) error {
 	tk := ctx.GetHeader("token")
 	if tk == "" {

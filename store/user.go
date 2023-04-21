@@ -22,6 +22,7 @@ type IUserStore interface {
 	FindDetailedByUserId(id string) (*model.UserDetailedInfo, error)                 // 依据用户id获取用户信息
 	UpdateDetailed(userDetailedInfo model.UserDetailedInfo) error                    // 修改用户信息
 	UpdateUserHeadPic(userAccountId string, headPicId string) error                  // 修改用户头像
+	UpdatePasswordById(userAccountId string, password string) error                  // 修改用户密码
 }
 
 var UserStore IUserStore = (*userStore)(nil)
@@ -158,5 +159,12 @@ func (*userStore) UpdateDetailed(userDetailedInfo model.UserDetailedInfo) error 
 func (*userStore) UpdateUserHeadPic(userAccountId string, headPicId string) error {
 	se := sqlt.NewSQLEngine[model.UserDetailedInfo](lib.DB)
 	_, err := se.Set("head_pic_id = ?", headPicId).Where("user_account_id = ?", userAccountId).Update().Exec()
+	return err
+}
+
+// 修改用户密码
+func (*userStore) UpdatePasswordById(userAccountId string, password string) error {
+	se := sqlt.NewSQLEngine[model.UserAccountInfo](lib.DB)
+	_, err := se.Set("password = MD5(?)", password).Where("id = ?", userAccountId).Update().Exec()
 	return err
 }
