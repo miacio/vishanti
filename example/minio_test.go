@@ -1,29 +1,35 @@
 package example_test
 
 import (
-	"context"
 	"fmt"
+	"os"
 	"testing"
+	"time"
 
 	"github.com/miacio/vishanti/lib"
-	"github.com/minio/minio-go/v7"
 )
 
-func TestAbc(t *testing.T) {
+func TestPutObject(t *testing.T) {
 	Runner()
-	found, err := lib.MinioClient.BucketExists(context.Background(), "miajio")
+	file, err := os.Open("C://Users/10428/Downloads/肖博夷 (1).pdf")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if found {
-		fmt.Println("buckent found")
-	} else {
-		if err := lib.MinioClient.MakeBucket(context.Background(), "miajio", minio.MakeBucketOptions{
-			Region:        "us-east-1",
-			ObjectLocking: true,
-		}); err != nil {
-			t.Fatal(err)
-		}
-		fmt.Println("successfully create miajio buckent")
+	fileStat, _ := file.Stat()
+
+	objTmpl := "files/%s/%d/%s"
+	objectName := fmt.Sprintf(objTmpl, "xxxxx", time.Now().UnixMicro(), fileStat.Name())
+
+	err = lib.Minio.PutObject("miajiodb", "miajio", objectName, file, fileStat.Size())
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestFPutObject(t *testing.T) {
+	Runner()
+	err := lib.Minio.FPutObject("miajiodb", "miajio", "/miajio/config2.toml", "./config.toml")
+	if err != nil {
+		t.Fatal(err)
 	}
 }

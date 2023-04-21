@@ -38,3 +38,17 @@ CREATE TABLE `system_dictionary` (
   `update_by` varchar(32) DEFAULT '' COMMENT '修改人id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='字典表';
+
+CREATE TABLE `system_file_info` (
+  `id` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件id',
+  `file_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '文件名',
+  `object_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT 'minio object name',
+  `region` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT 'minio region',
+  `bucket` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT 'minio bucket',
+  `file_size` bigint DEFAULT '0' COMMENT '文件大小',
+  `file_md5` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '文件md5',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `create_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '上传者id',
+  `used` int DEFAULT '0' COMMENT '是否使用',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

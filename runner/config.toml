@@ -24,3 +24,4 @@ endPoint="127.0.0.1:9000" #  minio服务器地址 服务ID-地址
 accessKey="Vvw9WyJlGWSBDbKl" #  minio 访问密钥
 secretKey="Z0hXJiVGKKU2CmIqKGIrkrul0hEKYwCg" #  minio 保密密钥
 useSSL=false # minio 服务协议是否使用https
+bucket="miajiodb" # minio 默认上传使用的桶名

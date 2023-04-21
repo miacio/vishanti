@@ -7,7 +7,7 @@ require (
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/google/uuid v1.3.0
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/miacio/varietas v1.0.8-beta
+	github.com/miacio/varietas v1.0.8-pro
 	github.com/minio/minio-go/v7 v7.0.52
 	github.com/redis/go-redis/v9 v9.0.3
 	github.com/spf13/viper v1.15.0

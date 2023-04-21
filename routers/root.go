@@ -19,10 +19,11 @@ func Register(e *web.Engine) {
 var (
 	root             web.Router = (*rootRouters)(nil)            // root 根节点路由
 	systemDictionary web.Router = (*systemDictionaryRouter)(nil) // systemDictionary 系统字典节点路由
+	systemFile       web.Router = (*systemFileRouter)(nil)       // systemFile 系统文件路由
 	email            web.Router = (*emailRouter)(nil)            // email 邮箱节点路由
 	user             web.Router = (*userRouter)(nil)             // user 用户节点路由
 
-	routers = []web.Router{root, systemDictionary, email, user}
+	routers = []web.Router{root, systemDictionary, systemFile, email, user}
 )
 
 // rootRouters 根节点路由实现 ↓↓↓
@@ -65,4 +66,9 @@ func (*rootRouters) Execute(e *gin.Engine) {
 	// error
 	e.GET("/error", errorHandler)
 	e.POST("/error", errorHandler)
+
+	e.GET("/page/:name", func(ctx *gin.Context) {
+		name := ctx.Param("name")
+		ctx.HTML(http.StatusOK, name, nil)
+	})
 }

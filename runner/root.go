@@ -76,7 +76,7 @@ func initConfig() {
 			lib.Log.Errorf("minio连接失败: %v", err)
 			os.Exit(0)
 		}
-		lib.MinioClient = client
+		lib.Minio.SetClient(client)
 	}
 }
 
