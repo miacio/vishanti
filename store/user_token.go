@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/miacio/varietas/util"
@@ -74,4 +75,17 @@ func TokenGet(ctx *gin.Context) (*UserStoreModel, bool) {
 		return nil, false
 	}
 	return obj.(*UserStoreModel), ok
+}
+
+func TokenFlush(ctx *gin.Context) error {
+	tk := ctx.GetHeader("token")
+	if tk == "" {
+		return errors.New("token获取失败")
+	}
+	obj, err := UserTokenStore.Get(tk)
+	if err != nil {
+		return err
+	}
+	_, err = UserTokenStore.LoginFlush(tk, obj.AccountInfo.ID)
+	return err
 }

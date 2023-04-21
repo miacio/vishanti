@@ -161,6 +161,9 @@ func (*userLogic) UpdateDetailed(ctx *gin.Context) {
 		lib.ServerResult(ctx, 500, "修改用户信息失败", nil, err)
 		return
 	}
+	if !lib.ServerFail(ctx, store.TokenFlush(ctx)) {
+		return
+	}
 	lib.ServerSuccess(ctx, "修改成功", nil)
 }
 
@@ -220,9 +223,12 @@ func (*userLogic) UpdateHeadPic(ctx *gin.Context) {
 		return
 	}
 
-	// systemFileInfoModel.ID
 	if err := store.UserStore.UpdateUserHeadPic(mo.AccountInfo.ID, systemFileInfoModel.ID); err != nil {
 		lib.ServerFail(ctx, err)
+		return
+	}
+
+	if !lib.ServerFail(ctx, store.TokenFlush(ctx)) {
 		return
 	}
 	lib.ServerSuccess(ctx, "修改成功", systemFileInfoModel.ID)
