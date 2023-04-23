@@ -48,6 +48,8 @@ func ObjectToTagMap(obj any, tag string) (map[string]interface{}, error) {
 				case reflect.String:
 					if len(valueOf.Field(i).String()) > 0 {
 						params[tag] = valueOf.Field(i).String()
+					} else {
+						params[tag] = ""
 					}
 				case reflect.Map:
 					if !valueOf.Field(i).IsNil() {

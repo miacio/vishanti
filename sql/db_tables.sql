@@ -51,4 +51,32 @@ CREATE TABLE `system_file_info` (
   `create_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '上传者id',
   `used` int DEFAULT '0' COMMENT '是否使用',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='文件表';
+
+CREATE TABLE `circles_info` (
+  `id` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT '圈子id',
+  `logo` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '圈子logo id',
+  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '圈子名称',
+  `descirbe` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '圈子描述',
+  `create_time` datetime DEFAULT NULL COMMENT '圈子的创建时间',
+  `create_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '圈子的创建者id',
+  `owner` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '圈子的所有者id',
+  `update_time` datetime DEFAULT NULL COMMENT '圈子的修改时间',
+  `update_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '圈子的修改者id',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='圈子主表';
+
+CREATE TABLE `circles_server_info` (
+  `id` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT '服务信息id',
+  `circles_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '圈子id',
+  `server_url` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '圈子服务器地址',
+  `public_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '公钥',
+  `secret_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '私钥',
+  `down` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '通信是否宕机 字典: [CIRCLES_SERVER_DOWN]',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `create_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '创建者id',
+  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  `update_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '修改者id',
+  `used` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '是由启用 字典: [CIRCLES_SERVER_USED]',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='圈子三方服务信息';

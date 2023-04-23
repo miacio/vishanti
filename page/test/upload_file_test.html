@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>upload file test</title>
+    <script src="../js/jquery-3.6.4.min.js"></script>
+    <script src="../js/spark-md5.min.js"></script>
+</head>
+
+<body>
+    <fieldset>
+        <legend>upload file test</legend>
+        <div>
+            token: <input id="token" value="" type="text" name="token">
+        </div>
+        <div>
+            region:
+            <input type="radio" name="region" value="miajiodb" checked>
+            <label for="miajiodb">miajiodb</label>
+            <input type="radio" name="region" value="beijing">
+            <label for="beijing">beijing</label>
+            <input type="radio" name="region" value="hangzhou">
+            <label for="hangzhou">hangzhou</label>
+        </div>
+        <div>
+            File: <input id="file" type="file" name="file">
+        </div>
+        <div>
+            MD5: <input id="md5" type="text" name="md5">
+        </div>
+        <div>
+            <input type="button" value="submit-head-pic" id="subimtHeadPic">
+            <input type="button" value="submit-file" id="subimtFile">
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>test load image file</legend>
+        <div>
+            fileId: <input id="fileId" value="" type="text">
+        </div>
+        <div>
+            <img id="imgFile" src="" />
+        </div>
+        <div>
+            <input type="button" value="getFile" id="getFile">
+        </div>
+    </fieldset>
+    <div>
+        <pre id="result"></pre>
+    </div>
+
+    <script>
+        document.getElementById('file').addEventListener('change', e => {
+            const file = e.target.files[0];
+            const fileReader = new FileReader()
+            try {
+                fileReader.readAsBinaryString(file);
+                fileReader.onload = e => {
+                    const md5 = SparkMD5.hashBinary(e.target.result);
+                    console.log(md5);
+                    $("#md5").val(md5)
+                }
+            } catch (err) {
+                $("#md5").val("")
+            }
+        });
+
+        $(function () {
+            function headPicUpload() {
+                var data = new FormData();
+                data.append("region", $("input[name='region']:checked").val());
+                data.append("md5", $("#md5").val());
+                data.append("file", $("#file").prop("files")[0]);
+                uploadFunc(data, "/user/detailed/updateHeadPic")
+            }
+
+            function fileUpload() {
+                var data = new FormData();
+                data.append("region", $("input[name='region']:checked").val());
+                data.append("md5", $("#md5").val());
+                data.append("file", $("#file").prop("files")[0]);
+                uploadFunc(data, "/file/upload")
+            }
+
+            function uploadFunc(formData, urlStr) {
+                $.ajax({
+                    url: urlStr,
+                    type: "POST",
+                    data: formData,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function (req) {
+                        req.setRequestHeader("token", $("#token").val());
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        console.log(data.data);
+                        $("#result").text(JSON.stringify(data, null, 2))
+
+                    }
+                });
+            }
+
+            function fileLoad() {
+                $("#imgFile").attr("src", "/file/load?id=" + $("#fileId").val())
+            }
+
+            $("#subimtHeadPic").click(headPicUpload)
+            $("#subimtFile").click(fileUpload)
+
+            $("#getFile").click(fileLoad)
+        })
+    </script>
+</body>
+
+</html>

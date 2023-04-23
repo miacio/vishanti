@@ -22,8 +22,9 @@ var (
 	systemFile       web.Router = (*systemFileRouter)(nil)       // systemFile 系统文件路由
 	email            web.Router = (*emailRouter)(nil)            // email 邮箱节点路由
 	user             web.Router = (*userRouter)(nil)             // user 用户节点路由
+	circles          web.Router = (*circlesRouter)(nil)          // circles 圈子节点路由
 
-	routers = []web.Router{root, systemDictionary, systemFile, email, user}
+	routers = []web.Router{root, systemDictionary, systemFile, email, user, circles}
 )
 
 // rootRouters 根节点路由实现 ↓↓↓
@@ -67,7 +68,7 @@ func (*rootRouters) Execute(e *gin.Engine) {
 	e.GET("/error", errorHandler)
 	e.POST("/error", errorHandler)
 
-	e.GET("/page/:name", func(ctx *gin.Context) {
+	e.GET("/test/:name", func(ctx *gin.Context) {
 		name := ctx.Param("name")
 		ctx.HTML(http.StatusOK, name, nil)
 	})

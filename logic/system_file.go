@@ -20,53 +20,39 @@ import (
 type systemFileLogic struct{}
 
 type ISystemFileLogic interface {
-	Upload(ctx *gin.Context) // Upload 文件上传
-	Load(ctx *gin.Context)   // Load 文件读取
+	Upload(*gin.Context)                                                                                                            // Upload 文件上传
+	UploadLogic(accountId string, logicName string, req fileDefaultUploadRequest, suffixs ...string) (*model.SystemFileInfo, error) // UploadLogic 上传逻辑 - 封装
+	Load(*gin.Context)                                                                                                              // Load 文件读取
 }
 
 var SystemFileLogic ISystemFileLogic = (*systemFileLogic)(nil)
 
 // fileDefaultUploadRequest 文件默认上传请求参数
 type fileDefaultUploadRequest struct {
-	File   *multipart.FileHeader `json:"file"`   // 文件对象
-	MD5    string                `json:"md5"`    // 文件md5
-	Region string                `json:"region"` // 文件上传地区
+	File   *multipart.FileHeader `form:"file" binding:"required"`                                   // 文件对象
+	MD5    string                `form:"md5" binding:"required"`                                    // 文件md5
+	Region string                `form:"region" binding:"required,oneof=miajiodb beijing hangzhou"` // 文件上传地区
 }
 
 // 绑定文件默认上传请求结构体
-func formFileDefaultUploadRequest(ctx *gin.Context, obj *fileDefaultUploadRequest) error {
-	reqMd5 := ctx.PostForm("md5")
-	region := ctx.PostForm("region")
-	if region == "" {
-		region = "miajiodb"
-	}
-
-	file, err := ctx.FormFile("file")
-	if err != nil {
-		return err
-	}
-
-	obj.File = file
-	obj.MD5 = reqMd5
-	mf, err := file.Open()
+func (f *fileDefaultUploadRequest) CheckMD5() error {
+	mf, err := f.File.Open()
 	if err != nil {
 		return err
 	}
 	defer mf.Close()
-	rmd5 := util.MD5File(mf)
-	if rmd5 != reqMd5 {
+	reMD5 := util.MD5File(mf)
+	if reMD5 != f.MD5 {
+		lib.Log.Errorf("md5不一致,系统检测的md5是:%s 接收的md5是:%s", reMD5, f.MD5)
 		return errors.New("md5不一致")
 	}
-
-	obj.Region = region
 	return nil
 }
 
 // Upload 文件上传
 func (*systemFileLogic) Upload(ctx *gin.Context) {
 	var req fileDefaultUploadRequest
-	err := formFileDefaultUploadRequest(ctx, &req)
-	if !lib.ServerFail(ctx, err) {
+	if !lib.ShouldBind(ctx, &req) {
 		return
 	}
 
@@ -75,22 +61,41 @@ func (*systemFileLogic) Upload(ctx *gin.Context) {
 		return
 	}
 
-	objTmpl := "%s/USER_FILES/%d/%s"
+	systemFileInfoModel, err := SystemFileLogic.UploadLogic(mo.AccountInfo.ID, "USER_FILES", req)
+	if !lib.ServerFail(ctx, err) {
+		return
+	}
+	lib.ServerSuccess(ctx, "上传成功", systemFileInfoModel.ID)
+}
+
+// UploadLogic 上传逻辑 - 封装
+// suffixs is lower string demo: [".jpg",".text"...]
+func (*systemFileLogic) UploadLogic(accountId string, logicName string, req fileDefaultUploadRequest, suffixs ...string) (*model.SystemFileInfo, error) {
+	if err := req.CheckMD5(); err != nil {
+		return nil, err
+	}
+	objTmpl := "%s/%s/%d/%s"
 	suffix := filepath.Ext(filepath.Base(req.File.Filename))
+	if suffixs != nil && len(suffix) > 0 {
+		if !util.SliceContain(suffixs, strings.ToLower(suffix)) {
+			return nil, fmt.Errorf("文件格式错误,目前仅支持[%s]文件格式", strings.Join(suffixs, ","))
+		}
+	}
+
 	fileName := strings.Join([]string{lib.UID(), suffix}, "")
 
-	objectName := fmt.Sprintf(objTmpl, mo.AccountInfo.ID, time.Now().UnixMicro(), fileName)
+	objectName := fmt.Sprintf(objTmpl, accountId, strings.ToUpper(logicName), time.Now().UnixMicro(), fileName)
 	fileSize := req.File.Size
 
 	mf, err := req.File.Open()
-	if !lib.ServerFail(ctx, err) {
-		return
+	if err != nil {
+		return nil, err
 	}
 	defer mf.Close()
 
 	err = lib.Minio.PutObject(lib.MinioCfg.Bucket, req.Region, objectName, mf, -1)
-	if !lib.ServerFail(ctx, err) {
-		return
+	if err != nil {
+		return nil, err
 	}
 
 	systemFileInfoModel := model.SystemFileInfo{
@@ -102,16 +107,14 @@ func (*systemFileLogic) Upload(ctx *gin.Context) {
 		FileSize:   fileSize,
 		FileMd5:    req.MD5,
 		CreateTime: model.JsonTimeNow(),
-		CreateBy:   mo.AccountInfo.ID,
+		CreateBy:   accountId,
 		Used:       0,
 	}
-
 	err = store.SystemFileStore.Insert(systemFileInfoModel)
-	if !lib.ServerFail(ctx, err) {
-		return
+	if err != nil {
+		return nil, err
 	}
-
-	lib.ServerSuccess(ctx, "上传成功", systemFileInfoModel.ID)
+	return &systemFileInfoModel, nil
 }
 
 // Load 文件读取

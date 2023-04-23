@@ -1,10 +1,6 @@
 package logic
 
 import (
-	"fmt"
-	"path/filepath"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/miacio/vishanti/lib"
 	"github.com/miacio/vishanti/model"
@@ -111,7 +107,7 @@ type emailLoginPwdRequest struct {
 // EmailLoginPwd 邮箱登录 密码登录方式
 func (*userLogic) EmailLoginPwd(ctx *gin.Context) {
 	var req emailLoginPwdRequest
-	if !lib.ShouldBindJSON(ctx, &req) {
+	if !lib.ShouldBind(ctx, &req) {
 		return
 	}
 	userAccountInfo, err := store.UserStore.FindAccountByEmailAndPwd(req.Email, req.Password)
@@ -202,8 +198,7 @@ func (*userLogic) UpdateDetailed(ctx *gin.Context) {
 // UpdateHeadPic 修改用户头像
 func (*userLogic) UpdateHeadPic(ctx *gin.Context) {
 	var req fileDefaultUploadRequest
-	err := formFileDefaultUploadRequest(ctx, &req)
-	if !lib.ServerFail(ctx, err) {
+	if !lib.ShouldBind(ctx, &req) {
 		return
 	}
 
@@ -211,46 +206,8 @@ func (*userLogic) UpdateHeadPic(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	objTmpl := "%s/USER_HEAD_PIC/%s"
-	suffix := filepath.Ext(filepath.Base(req.File.Filename))
-	switch strings.ToLower(suffix) {
-	case ".jpg", ".jpeg", ".png", ".svg", ".webp":
-	default:
-		lib.ServerResult(ctx, 400, "文件格式错误,无法上传,目前仅支持[jpg,jpeg,png,svg,webp]文件格式作为头像", nil, nil)
-		return
-	}
 
-	fileName := strings.Join([]string{lib.UID(), suffix}, "")
-
-	objectName := fmt.Sprintf(objTmpl, mo.AccountInfo.ID, fileName)
-
-	fileSize := req.File.Size
-
-	mf, err := req.File.Open()
-	if !lib.ServerFail(ctx, err) {
-		return
-	}
-	defer mf.Close()
-
-	err = lib.Minio.PutObject(lib.MinioCfg.Bucket, req.Region, objectName, mf, -1)
-	if !lib.ServerFail(ctx, err) {
-		return
-	}
-
-	systemFileInfoModel := model.SystemFileInfo{
-		ID:         lib.UID(),
-		FileName:   req.File.Filename,
-		ObjectName: objectName,
-		Region:     req.Region,
-		Bucket:     lib.MinioCfg.Bucket,
-		FileSize:   fileSize,
-		FileMd5:    req.MD5,
-		CreateTime: model.JsonTimeNow(),
-		CreateBy:   mo.AccountInfo.ID,
-		Used:       0,
-	}
-
-	err = store.SystemFileStore.Insert(systemFileInfoModel)
+	systemFileInfoModel, err := SystemFileLogic.UploadLogic(mo.AccountInfo.ID, "USER_HEAD_PIC", req, ".jpg", ".jpeg", ".png", ".svg", ".webp")
 	if !lib.ServerFail(ctx, err) {
 		return
 	}
