@@ -19,6 +19,7 @@ type IUserStore interface {
 	FindAccountByEmail(email string) (*model.UserAccountInfo, error)                 // 依据用户邮箱号获取用户信息
 	FindAccountByEmailAndPwd(email, password string) (*model.UserAccountInfo, error) // 依据用户邮箱号和密码获取用户信息
 	FindAccountById(id string) (*model.UserAccountInfo, error)                       // 依据用户账号id获取用户信息
+	FindByAccount(account string) (*model.UserAccountInfo, error)                    // 依据用户账号获取用户信息
 	FindDetailedByUserId(id string) (*model.UserDetailedInfo, error)                 // 依据用户id获取用户信息
 	UpdateDetailed(userDetailedInfo model.UserDetailedInfo) error                    // 修改用户信息
 	UpdateUserHeadPic(userAccountId string, headPicId string) error                  // 修改用户头像
@@ -92,6 +93,9 @@ func (u *userStore) EmailRegister(email, nickName, account, password string) (st
 func (*userStore) FindAccountByEmail(email string) (*model.UserAccountInfo, error) {
 	var result model.UserAccountInfo
 	err := sqlt.NewSQLEngine[model.UserAccountInfo](lib.DB).Where("email = ?", email).Get(&result)
+	if err != nil {
+		return nil, err
+	}
 	result.Password = ""
 	return &result, err
 }
@@ -100,6 +104,9 @@ func (*userStore) FindAccountByEmail(email string) (*model.UserAccountInfo, erro
 func (*userStore) FindAccountByEmailAndPwd(email, password string) (*model.UserAccountInfo, error) {
 	var result model.UserAccountInfo
 	err := sqlt.NewSQLEngine[model.UserAccountInfo](lib.DB).Where("email = ? and password = MD5(?)", email, password).Get(&result)
+	if err != nil {
+		return nil, err
+	}
 	result.Password = ""
 	return &result, err
 }
@@ -108,6 +115,20 @@ func (*userStore) FindAccountByEmailAndPwd(email, password string) (*model.UserA
 func (*userStore) FindAccountById(id string) (*model.UserAccountInfo, error) {
 	var result model.UserAccountInfo
 	err := sqlt.NewSQLEngine[model.UserAccountInfo](lib.DB).Where("id = ?", id).Get(&result)
+	if err != nil {
+		return nil, err
+	}
+	result.Password = ""
+	return &result, err
+}
+
+// 依据用户账号获取用户账号信息
+func (*userStore) FindByAccount(account string) (*model.UserAccountInfo, error) {
+	var result model.UserAccountInfo
+	err := sqlt.NewSQLEngine[model.UserAccountInfo](lib.DB).Where("account = ?", account).Get(&result)
+	if err != nil {
+		return nil, err
+	}
 	result.Password = ""
 	return &result, err
 }
@@ -116,6 +137,9 @@ func (*userStore) FindAccountById(id string) (*model.UserAccountInfo, error) {
 func (*userStore) FindDetailedByUserId(id string) (*model.UserDetailedInfo, error) {
 	var result model.UserDetailedInfo
 	err := sqlt.NewSQLEngine[model.UserDetailedInfo](lib.DB).Where("user_account_id = ?", id).Get(&result)
+	if err != nil {
+		return nil, err
+	}
 	return &result, err
 }
 

@@ -80,3 +80,24 @@ CREATE TABLE `circles_server_info` (
   `used` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '是由启用 字典: [CIRCLES_SERVER_USED]',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='圈子三方服务信息';
+
+CREATE TABLE `circles_manager_users` (
+  `id` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT '圈子管理员id',
+  `circles_id` varchar(32) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '圈子id',
+  `user_id` varchar(32) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '用户id',
+  `level` varchar(32) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '管理员权限等级-圈子的管理权限将依据对应圈子开发者设定的规则而定义,该位置仅用于存储',
+  `create_time` datetime DEFAULT NULL COMMENT '成为管理员的时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='圈子管理员表';
+
+CREATE TABLE `circles_users` (
+  `id` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT '圈子用户id',
+  `circles_id` varchar(32) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '圈子id',
+  `user_id` varchar(32) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '用户id',
+  `head_pic` varchar(32) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '圈子用户头像id',
+  `experience` varchar(32) COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '用户在该圈子的经验值',
+  `create_time` datetime DEFAULT NULL COMMENT '用户加入圈子的时间',
+  `out_time` datetime DEFAULT NULL COMMENT '用户退出圈子的时间',
+  `is_sign_out` varchar(32) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '是否退出圈子 字典[CIRCLES_SIGN_OUT]',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='圈子用户表';

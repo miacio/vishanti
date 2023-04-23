@@ -13,6 +13,7 @@ type systemDictionaryStore struct{}
 
 type ISystemDictionaryStore interface {
 	FindGroupAndValByName(group, val string) (string, error)                                         // 依据组名和值获取字典名称
+	FindGroupAndNameByVal(group, name string) (string, error)                                        // 依据组名和名称获取字典值
 	FindById(id string) (model.SystemDictionary, error)                                              // 依据字典id值获取字典信息
 	FindByGroup(group string) ([]model.SystemDictionary, error)                                      // 依据字典组获取该组所有字典
 	InsertSystemDictionary(systemDictionary model.SystemDictionary) (*model.SystemDictionary, error) // 添加字典方法
@@ -26,6 +27,13 @@ func (*systemDictionaryStore) FindGroupAndValByName(group, val string) (string, 
 	var name string
 	err := sqlt.NewSQLEngine[model.SystemDictionary](lib.DB).Where("`group` = ? and val = ?", group, val).Get(&name, "name")
 	return name, err
+}
+
+// 依据组名和名称获取字典值
+func (*systemDictionaryStore) FindGroupAndNameByVal(group, name string) (string, error) {
+	var val string
+	err := sqlt.NewSQLEngine[model.SystemDictionary](lib.DB).Where("`group` = ? and name = ?", group, name).Get(&name, "val")
+	return val, err
 }
 
 // 依据字典id值获取字典信息

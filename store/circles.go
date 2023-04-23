@@ -12,8 +12,9 @@ import (
 type circlesStore struct{}
 
 type ICirclesStore interface {
-	Create(model.CirclesInfo) (string, error)               // Create 创建圈子
-	FindById(accountId string) ([]model.CirclesInfo, error) // FindById 查询该用户拥有的圈子
+	Create(model.CirclesInfo) (string, error)                   // Create 创建圈子
+	FindByUserId(accountId string) ([]model.CirclesInfo, error) // FindByUserId 查询该用户拥有的圈子
+	FindByIds(ids ...string) ([]model.CirclesInfo, error)       // FindByIds 依据圈子id列表查询圈子
 }
 
 var CirclesStore ICirclesStore = (*circlesStore)(nil)
@@ -41,10 +42,18 @@ func (*circlesStore) Create(circlesInfo model.CirclesInfo) (string, error) {
 	return circlesInfo.ID, nil
 }
 
-// FindById 查询该用户拥有的圈子
-func (*circlesStore) FindById(accountId string) ([]model.CirclesInfo, error) {
+// FindByUserId 查询该用户拥有的圈子
+func (*circlesStore) FindByUserId(accountId string) ([]model.CirclesInfo, error) {
 	findEngine := sqlt.NewSQLEngine[model.CirclesInfo](lib.DB)
 	var result []model.CirclesInfo
 	err := findEngine.Where("owner = ?", accountId).Find(&result)
+	return result, err
+}
+
+// FindByIds 依据圈子id列表查询圈子
+func (*circlesStore) FindByIds(ids ...string) ([]model.CirclesInfo, error) {
+	findEngine := sqlt.NewSQLEngine[model.CirclesInfo](lib.DB)
+	var result []model.CirclesInfo
+	err := findEngine.Where("id in ?", ids).Find(&result)
 	return result, err
 }
