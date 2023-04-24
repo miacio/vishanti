@@ -30,11 +30,10 @@ func (*circlesUsersStore) Create(circlesUsers model.CirclesUsers) (string, error
 	circlesUsersEngine := sqlt.NewSQLEngine[model.CirclesUsers](lib.DB)
 	var oldCirclesUsers model.CirclesUsers
 	err := circlesUsersEngine.Where("circles_id = ? and user_id = ?", circlesUsers.CirclesID, circlesUsers.UserID).Select().Get(&oldCirclesUsers)
-	if err != nil {
+	if err != nil && err.Error() != "sql: no rows in result set" {
 		return "", err
 	}
-
-	if oldCirclesUsers.ID != "" {
+	if err == nil || err.Error() != "sql: no rows in result set" {
 		name, err := SystemDictionaryStore.FindGroupAndValByName("CIRCLES_SIGN_OUT", oldCirclesUsers.IsSignOut)
 		if err != nil {
 			return "", err
@@ -54,6 +53,17 @@ func (*circlesUsersStore) Create(circlesUsers model.CirclesUsers) (string, error
 			return oldCirclesUsers.ID, err
 		default:
 			return "", errors.New("当前用户已经在该圈子中")
+		}
+	}
+	// 判断当前用户拥有该圈子, 那么直接加入该圈子
+	circles, err := CirclesStore.FindByUserId(circlesUsers.UserID)
+	if err != nil {
+		return "", err
+	}
+	for _, circle := range circles {
+		if circle.ID == circlesUsers.CirclesID {
+			circlesUsers.IsSignOut = "3"
+			break
 		}
 	}
 

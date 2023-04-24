@@ -15,7 +15,7 @@
 
 <body>
     <fieldset>
-        <legend>create circles test</legend>
+        <legend><h1>create circles test</h1></legend>
         <div>
             token: <input id="token" value="" type="text" name="token">
         </div>
@@ -45,6 +45,45 @@
             <input type="button" value="find-my-circles" id="find-my-circles">
         </div>
     </fieldset>
+
+    <fieldset>
+        <legend><h1>invite join test</h1></legend>
+        <div>
+            Token: <input type="text" name="invite-join-circles-token" id="invite-join-circles-token">
+        </div>
+        <div>
+            CirclesId: <input type="text" name="invite-join-circles-id" id="invite-join-circles-id">
+        </div>
+        <div>
+            UserAccount: <input type="text" name="invite-join-user-account" id="invite-join-user-account">
+        </div>
+        <div>
+            <input type="button" id="invite-join-button" value="invite-join-button">
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend><h1>request join test</h1></legend>
+        <div>
+            Token: <input type="text" name="request-join-circles-token" id="request-join-circles-token">
+        </div>
+        <div>
+            CirclesId: <input type="text" name="request-join-circles-id" id="request-join-circles-id">
+        </div>
+        <div>
+            <input type="button" id="request-join-button" value="request-join-button">
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend><h1>find my join test</h1></legend>
+        <div>
+            Token: <input type="text" name="find-my-join-circles-token" id="find-my-join-circles-token">
+        </div>
+        <div>
+            <input type="button" id="find-my-join-circles-button" value="find-my-join-circles-button">
+        </div>
+    </fieldset>
+
     <div>
         <pre id="result">
         </pre>
@@ -109,8 +148,77 @@
                 });
             }
 
+
+            function inviteJoin() {
+                var formData = new FormData()
+                formData.append("circles_id", $("#invite-join-circles-id").val())
+                formData.append("user_account", $("#invite-join-user-account").val())
+
+                $.ajax({
+                    url: "/circles/inviteJoin",
+                    type: "POST",
+                    data: formData,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function (req) {
+                        req.setRequestHeader("token", $("#invite-join-circles-token").val());
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        console.log(data.data);
+                        $("#result").text(JSON.stringify(data, null, 2))
+
+                    }
+                })
+            }
+
+            function requestJoin() {
+                var formData = new FormData()
+                formData.append("circles_id", $("#request-join-circles-id").val())
+
+                $.ajax({
+                    url: "/circles/requestJoin",
+                    type: "POST",
+                    data: formData,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function (req) {
+                        req.setRequestHeader("token", $("#request-join-circles-token").val());
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        console.log(data.data);
+                        $("#result").text(JSON.stringify(data, null, 2))
+
+                    }
+                })
+            }
+
+            function findMyJoin() {
+                $.ajax({
+                    url: "/circles/findMyJoin",
+                    type: "GET",
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function (req) {
+                        req.setRequestHeader("token", $("#find-my-join-circles-token").val());
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        console.log(data.data);
+                        $("#result").text(JSON.stringify(data, null, 2))
+                    }
+                })
+            }
+
             $("#create-circles-button").click(createCircles)
             $("#find-my-circles").click(findCircles)
+            $("#invite-join-button").click(inviteJoin)
+            $("#request-join-button").click(requestJoin)
+            $("#find-my-join-circles-button").click(findMyJoin)
         });
 
     </script>

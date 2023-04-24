@@ -1,0 +1,3 @@
+###
+GET http://localhost:8080/circles/findMyCircles
+token: 1B75E45DAAAA47D996316668BAD5E2FA

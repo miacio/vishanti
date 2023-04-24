@@ -80,6 +80,9 @@ func (se *SQLEngine[T]) Clear() *SQLEngine[T] {
 // whereAppend
 // end 是否结束当前子句
 func (se *SQLEngine[T]) whereAppend(end bool, condition string, vals ...interface{}) {
+	if vals == nil {
+		panic("vals is empty")
+	}
 	var clause Clause
 	if se.whereClause == nil || len(se.whereClause) == 0 {
 		clause = NewClause()
@@ -129,6 +132,14 @@ func (se *SQLEngine[T]) And(condition string, vals ...interface{}) *SQLEngine[T]
 func (se *SQLEngine[T]) Or(condition string, vals ...interface{}) *SQLEngine[T] {
 	se.CloseClause()
 	se.whereAppend(false, condition, vals...)
+	return se
+}
+
+// In
+func (se *SQLEngine[T]) In(condition string, vals ...interface{}) *SQLEngine[T] {
+	sqle, params, err := sqlx.In(condition, vals...)
+	se.optionError = err
+	se.whereAppend(false, sqle, params...)
 	return se
 }
 

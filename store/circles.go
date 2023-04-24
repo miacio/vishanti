@@ -54,6 +54,6 @@ func (*circlesStore) FindByUserId(accountId string) ([]model.CirclesInfo, error)
 func (*circlesStore) FindByIds(ids ...string) ([]model.CirclesInfo, error) {
 	findEngine := sqlt.NewSQLEngine[model.CirclesInfo](lib.DB)
 	var result []model.CirclesInfo
-	err := findEngine.Where("id in ?", ids).Find(&result)
+	err := findEngine.In("id in (?)", ids).Find(&result)
 	return result, err
 }
