@@ -185,7 +185,7 @@ func (*userLogic) UpdateDetailed(ctx *gin.Context) {
 		return
 	}
 
-	if err := store.UserStore.UpdateDetailed(req.ToModel(mo.AccountInfo.ID, mo.DetailedInfo.ID)); err != nil {
+	if err := store.UserStore.UpdateDetailed(req.ToModel(mo.DetailedInfo.ID, mo.AccountInfo.ID)); err != nil {
 		lib.ServerResult(ctx, 500, "修改用户信息失败", nil, err)
 		return
 	}

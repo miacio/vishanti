@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/miacio/vishanti/lib"
 )
 
 // 操作类型
@@ -345,6 +346,7 @@ func (se *SQLEngine[T]) Exec() (sql.Result, error) {
 	var err error
 	switch se.optionType {
 	case UPDATE, DELETE:
+		lib.Log.Debugf("sql engine exec: %s [%v]", se.sql, se.params)
 		result, err = se.db.Exec(se.sql, se.params...)
 		se.Clear()
 		return result, err

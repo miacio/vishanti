@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>circles test</title>
+    <script src="../js/jquery-3.6.4.min.js"></script>
+    <script src="../js/spark-md5.min.js"></script>
+    <style>
+        pre {
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <fieldset>
+        <legend><h1>email register test</h1></legend>
+        <div>
+            email: <input type="text" id="register-email" name="register-email">
+        </div>
+        <div>
+            code: <input type="text" id="register-code" name="register-code">
+        </div>
+        <div>
+            email-uid: <input type="text" id="register-email-uid" name="register-email-uid">
+        </div>
+        <div>
+            nickName: <input type="text" id="register-nick-name" name="register-nick-name">
+        </div>
+        <div>
+            account: <input type="text" id="register-account" name="register-account">
+        </div>
+        <div>
+            password: <input type="password" id="register-password" name="register-password">
+        </div>
+        <div>
+            <input type="button" value="email-register-button" id="email-register-button">
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend><h1>email code login</h1></legend>
+        <div>
+            email: <input type="text" id="code-login-email" name="code-login-email">
+        </div>
+        <div>
+            code: <input type="text" id="code-login-code" name="code-login-code">
+        </div>
+        <div>
+            email-uid: <input type="text" id="code-login-email-uid" name="code-login-email-uid">
+        </div>
+        <div>
+            <input type="button" value="email-code-login-button" id="email-code-login-button">
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend><h1>email login test</h1></legend>
+        <div>
+            email: <input type="text" id="login-email" name="login-email">
+        </div>
+        <div>
+            password: <input type="password" id="login-password" name="login-password">
+        </div>
+        <div>
+            <input type="button" value="email-login-button" id="email-login-button">
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend><h1>email update password</h1></legend>
+        <div>
+            email: <input type="text" id="update-pwd-email" name="update-pwd-email">
+        </div>
+        <div>
+            password: <input type="password" id="update-pwd-password" name="update-pwd-password">
+        </div>
+        <div>
+            code: <input type="text" id="update-pwd-code" name="update-pwd-code">
+        </div>
+        <div>
+            email-uid: <input type="text" id="update-pwd-email-uid" name="update-pwd-email-uid">
+        </div>
+        <div>
+            <input type="button" value="email-update-pwd-button" id="email-update-pwd-button">
+        </div>
+    </fieldset>
+    <div>
+        <pre id="result">
+        </pre>
+    </div>
+    <script>
+        
+        $(function() {
+            function emailRegister() {
+                var data = {
+                    "email": $("#register-email").val(),
+                    "code": $("#register-code").val(),
+                    "uid": $("#register-email-uid").val(),
+                    "nickName": $("#register-nick-name").val(),
+                    "account": $("#register-account").val(),
+                    "password": $("#register-password").val()
+                }
+                $.ajax({
+                    url: "/user/email/register",
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (data) {
+                        $("#result").text(JSON.stringify(data, null, 2))
+                    }
+                });
+            }
+
+            function emailCodeLogin() {
+                var data = {
+                    "email": $("#code-login-email").val(),
+                    "code": $("#code-login-code").val(),
+                    "uid": $("#code-login-email-uid").val()
+                }
+                $.ajax({
+                    url: "/user/email/login",
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (data) {
+                        $("#result").text(JSON.stringify(data, null, 2))
+                    }
+                });
+            }
+
+            function emailLoginPwd() {
+                var data = new FormData();
+                data.append("email", $("#login-email").val());
+                data.append("password", $("#login-password").val());
+                $.ajax({
+                    url: "/user/email/loginPwd",
+                    type: "POST",
+                    data: data,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        console.log(data);
+                        console.log(data.data);
+                        $("#result").text(JSON.stringify(data, null, 2))
+                    }
+                });
+            }
+
+            function emailUpdatePwd() {
+                var data = {
+                    "email": $("#update-pwd-email").val(),
+                    "password": $("#update-pwd-password").val(),
+                    "code": $("#update-pwd-code").val(),
+                    "uid": $("#update-pwd-email-uid").val()
+                }
+                $.ajax({
+                    url: "/user/email/updatePwd",
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (data) {
+                        $("#result").text(JSON.stringify(data, null, 2))
+                    }
+                });
+            }
+
+            $("#email-register-button").click(emailRegister)
+            $("#email-code-login-button").click(emailCodeLogin)
+            $("#email-login-button").click(emailLoginPwd)
+            $("#email-update-pwd-button").click(emailUpdatePwd)
+        });
+
+    </script>
+</body>
+</html>

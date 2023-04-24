@@ -15,15 +15,40 @@
 
 <body>
     <fieldset>
-        <legend>email login test</legend>
+        <legend>
+            <h1>token get user message</h1>
+        </legend>
         <div>
-            email: <input type="text" id="email" name="email">
+            token: <input type="text" id="get-token" name="get-token">
         </div>
         <div>
-            password: <input type="password" id="password" name="password">
+            <input type="button" value="get-token-button" id="get-token-button">
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>
+            <h1>update user detailed</h1>
+        </legend>
+        <div>
+            token: <input type="text" id="update-user-detailed-token" name="update-user-detailed-token">
         </div>
         <div>
-            <input type="button" value="email-login-button" id="email-login-button">
+            nickName: <input type="text" id="update-user-detailed-nick-name" name="update-user-detailed-nick-name">
+        </div>
+        <div>
+            sex: <input type="text" id="update-user-detailed-sex" name="update-user-detailed-sex">
+        </div>
+        <div>
+            birthdayYear: <input type="number" id="update-user-detailed-birthdayYear"
+                name="update-user-detailed-birthdayYear">
+            birthdayMonth: <input type="number" id="update-user-detailed-birthdayMonth"
+                name="update-user-detailed-birthdayMonth">
+            birthdayDay: <input type="number" id="update-user-detailed-birthdayDay"
+                name="update-user-detailed-birthdayDay">
+        </div>
+        <div>
+            <input type="button" value="update-user-detailed-button" id="update-user-detailed-button">
         </div>
     </fieldset>
     <div>
@@ -31,30 +56,51 @@
         </pre>
     </div>
     <script>
-        
-        $(function() {
-            function emailLoginPwd() {
-                var data = new FormData();
-                data.append("email", $("#email").val());
-                data.append("password", $("#password").val());
+
+        $(function () {
+            function sendEmail() {
+
                 $.ajax({
-                    url: "/user/email/loginPwd",
-                    type: "POST",
-                    data: data,
-                    cache: false,
-                    processData: false,
-                    contentType: false,
+                    url: "/user/token?token=" + $("#get-token").val(),
+                    type: "GET",
                     success: function (data) {
-                        console.log(data);
-                        console.log(data.data);
                         $("#result").text(JSON.stringify(data, null, 2))
                     }
                 });
             }
 
-            $("#email-login-button").click(emailLoginPwd)
+            function updateUserDetailed() {
+                var data = {
+                    "nickName": $("#update-user-detailed-nick-name").val(),
+                    "sex": $("#update-user-detailed-sex").val(),
+                    "birthdayYear": parseInt($("#update-user-detailed-birthdayYear").val()),
+                    "birthdayMonth": parseInt($("#update-user-detailed-birthdayMonth").val()),
+                    "birthdayDay": parseInt($("#update-user-detailed-birthdayDay").val())
+                }
+                console.log(JSON.stringify(data))
+
+                $.ajax({
+                    url: "/user/detailed/update",
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    cache: false,
+                    processData: false,
+                    beforeSend: function (req) {
+                        req.setRequestHeader("token", $("#update-user-detailed-token").val());
+                    },
+                    success: function (data) {
+                        $("#result").text(JSON.stringify(data, null, 2))
+                    }
+                });
+            }
+
+            $("#get-token-button").click(sendEmail)
+            $("#update-user-detailed-button").click(updateUserDetailed)
         });
 
     </script>
 </body>
+
 </html>

@@ -18,7 +18,7 @@ type ICirclesLogic interface {
 	Find(*gin.Context)        // Find 查询自己所拥有的圈子
 	InviteJoin(*gin.Context)  // InviteJoin 邀请用户加入圈子
 	RequestJoin(*gin.Context) // RequestJoin 用户申请加入圈子
-	FindMyJoin(*gin.Context)  // FindMyJoin 查询当前用户加入中的圈子信息
+	FindMyJoin(*gin.Context)  // FindMyJoin 查询当前用户加入的圈子信息
 }
 
 var CirclesLogic ICirclesLogic = (*circlesLogic)(nil)
@@ -199,7 +199,7 @@ func (*circlesLogic) RequestJoin(ctx *gin.Context) {
 	lib.ServerSuccess(ctx, "申请成功", nil)
 }
 
-// FindMyJoin 查询当前用户加入中的圈子信息
+// FindMyJoin 查询当前用户加入的圈子信息
 func (*circlesLogic) FindMyJoin(ctx *gin.Context) {
 	loginUser, ok := store.TokenGet(ctx)
 	if !ok {

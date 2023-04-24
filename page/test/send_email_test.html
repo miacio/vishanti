@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>circles test</title>
+    <script src="../js/jquery-3.6.4.min.js"></script>
+    <script src="../js/spark-md5.min.js"></script>
+    <style>
+        pre {
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <fieldset>
+        <legend><h1>send email test</h1></legend>
+        <div>
+            email: <input type="text" id="email" name="email">
+        </div>
+        <div>
+            emailType:
+            <input type="radio" name="emailType" value="register" checked>
+            <label for="register">register</label>
+            <input type="radio" name="emailType" value="login">
+            <label for="login">login</label>
+            <input type="radio" name="emailType" value="update">
+            <label for="update">update</label>
+        </div>
+        <div>
+            <input type="button" value="send-email-button" id="send-email-button">
+        </div>
+    </fieldset>
+    <div>
+        <pre id="result">
+        </pre>
+    </div>
+    <script>
+        
+        $(function() {
+            function sendEmail() {
+                var data = {
+                    "email": $("#email").val(),
+                    "emailType": $("input[name='emailType']:checked").val()
+                }
+                $.ajax({
+                    url: "/email/sendCheckCode",
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (data) {
+                        $("#result").text(JSON.stringify(data, null, 2))
+                    }
+                });
+            }
+
+            $("#send-email-button").click(sendEmail)
+        });
+
+    </script>
+</body>
+</html>
