@@ -14,11 +14,16 @@ import (
 type circlesLogic struct{}
 
 type ICirclesLogic interface {
-	Create(*gin.Context)      // Create 创建圈子
-	Find(*gin.Context)        // Find 查询自己所拥有的圈子
-	InviteJoin(*gin.Context)  // InviteJoin 邀请用户加入圈子
-	RequestJoin(*gin.Context) // RequestJoin 用户申请加入圈子
-	FindMyJoin(*gin.Context)  // FindMyJoin 查询当前用户加入的圈子信息
+	Create(*gin.Context)                          // Create 创建圈子
+	Find(*gin.Context)                            // Find 查询自己所拥有的圈子
+	InviteJoin(*gin.Context)                      // InviteJoin 邀请用户加入圈子
+	RequestJoin(*gin.Context)                     // RequestJoin 用户申请加入圈子
+	FindMyJoin(*gin.Context)                      // FindMyJoin 查询当前用户加入的圈子信息
+	findByJoin(signType string, ctx *gin.Context) // findByJoin 依据类型查询加入的用户信息
+
+	QueryRequestJoin(*gin.Context) // QueryRequestJoin 查询当前用户下圈子的申请加入的用户列表
+	QueryInviteJoin(*gin.Context)  // QueryInviteJoin 查询当前用户下邀请该用户加入圈子的圈子列表
+
 }
 
 var CirclesLogic ICirclesLogic = (*circlesLogic)(nil)
@@ -222,4 +227,62 @@ func (*circlesLogic) FindMyJoin(ctx *gin.Context) {
 		return
 	}
 	lib.ServerSuccess(ctx, "当前用户暂未加入圈子", nil)
+}
+
+type findJoinResponse struct {
+	Id        string `json:"id"`         // 圈子用户id
+	CirclesId string `json:"circles_id"` // 圈子id
+	AccountId string `json:"account_id"` // 用户账号id
+	NickName  string `json:"nick_name"`  // 用户昵称
+	HeadPic   string `json:"head_pic"`   // 用户头像id
+	SignType  string `json:"sign_type"`  // 用户加入状态
+}
+
+func (*circlesLogic) findByJoin(signType string, ctx *gin.Context) {
+	loginUser, ok := store.TokenGet(ctx)
+	if !ok {
+		return
+	}
+	circles, err := store.CirclesStore.FindByUserId(loginUser.AccountInfo.ID)
+	if !lib.ServerFail(ctx, err) {
+		return
+	}
+
+	circlesIds := make([]string, 0)
+	for i := range circles {
+		circlesIds = append(circlesIds, circles[i].ID)
+	}
+
+	circlesUsers, err := store.CirclesUsersStore.FindCirclesBySignType(signType, circlesIds...)
+	if !lib.ServerFail(ctx, err) {
+		return
+	}
+
+	result := make([]findJoinResponse, 0)
+	for i := range circlesUsers {
+		circlesUser := circlesUsers[i]
+		userDetailed, err := store.UserStore.FindDetailedByUserId(circlesUser.UserID)
+		if !lib.ServerFail(ctx, err) {
+			return
+		}
+		result = append(result, findJoinResponse{
+			Id:        circlesUser.ID,
+			CirclesId: circlesUser.CirclesID,
+			AccountId: circlesUser.UserID,
+			NickName:  userDetailed.NickName,
+			HeadPic:   userDetailed.HeadPicID,
+			SignType:  circlesUser.IsSignOut,
+		})
+	}
+	lib.ServerSuccess(ctx, "查询成功", result)
+}
+
+// QueryRequestJoin 查询当前用户下圈子的申请加入的用户列表
+func (*circlesLogic) QueryRequestJoin(ctx *gin.Context) {
+	CirclesLogic.findByJoin("2", ctx)
+}
+
+// QueryInviteJoin 查询当前用户下邀请该用户加入圈子的圈子列表
+func (*circlesLogic) QueryInviteJoin(ctx *gin.Context) {
+	CirclesLogic.findByJoin("1", ctx)
 }

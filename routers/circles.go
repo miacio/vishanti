@@ -11,10 +11,17 @@ type circlesRouter struct{}
 
 func (*circlesRouter) Execute(e *gin.Engine) {
 	circlesGroup := e.Group("/circles", middlewares.Auth())
-	circlesGroup.POST("/create", logic.CirclesLogic.Create)           // 创建圈子
-	circlesGroup.GET("/find", logic.CirclesLogic.Find)                // 查询自己所拥有的圈子
-	circlesGroup.POST("/inviteJoin", logic.CirclesLogic.InviteJoin)   // 邀请用户加入圈子
-	circlesGroup.POST("/requestJoin", logic.CirclesLogic.RequestJoin) // 用户申请加入圈子
-	circlesGroup.GET("/findMyJoin", logic.CirclesLogic.FindMyJoin)    // 用户加入的圈子列表
+	{
+		circlesGroup.POST("/create", logic.CirclesLogic.Create)        // 创建圈子
+		circlesGroup.GET("/find", logic.CirclesLogic.Find)             // 查询自己所拥有的圈子
+		circlesGroup.GET("/findMyJoin", logic.CirclesLogic.FindMyJoin) // 用户加入的圈子列表
+
+		circlesGroup.POST("/inviteJoin", logic.CirclesLogic.InviteJoin)   // 邀请用户加入圈子
+		circlesGroup.POST("/requestJoin", logic.CirclesLogic.RequestJoin) // 用户申请加入圈子
+
+		circlesGroup.GET("/queryRequestJoin", logic.CirclesLogic.QueryRequestJoin) // 查询当前用户下圈子的申请加入的用户列表
+		circlesGroup.GET("/queryInviteJoin", logic.CirclesLogic.QueryInviteJoin)   // 查询当前用户下邀请该用户加入圈子的圈子列表
+
+	}
 
 }

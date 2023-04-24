@@ -84,6 +84,26 @@
         </div>
     </fieldset>
 
+    <fieldset>
+        <legend><h1>query my circles request join users test</h1></legend>
+        <div>
+            Token: <input type="text" name="query-my-circles-request-join-token" id="query-my-circles-request-join-token">
+        </div>
+        <div>
+            <input type="button" id="query-my-circles-request-join-button" value="query-my-circles-request-join-button">
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend><h1>query my circles invite join users test</h1></legend>
+        <div>
+            Token: <input type="text" name="query-my-circles-invite-join-token" id="query-my-circles-invite-join-token">
+        </div>
+        <div>
+            <input type="button" id="query-my-circles-invite-join-button" value="query-my-circles-invite-join-button">
+        </div>
+    </fieldset>
+
     <div>
         <pre id="result">
         </pre>
@@ -214,11 +234,49 @@
                 })
             }
 
+            function queryMyCirclesRequestJoin() {
+                $.ajax({
+                    url: "/circles/queryRequestJoin",
+                    type: "GET",
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function (req) {
+                        req.setRequestHeader("token", $("#query-my-circles-request-join-token").val());
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        console.log(data.data);
+                        $("#result").text(JSON.stringify(data, null, 2))
+                    }
+                })
+            }
+
+            function queryMyCirclesInviteJoin() {
+                $.ajax({
+                    url: "/circles/queryInviteJoin",
+                    type: "GET",
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function (req) {
+                        req.setRequestHeader("token", $("#query-my-circles-invite-join-token").val());
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        console.log(data.data);
+                        $("#result").text(JSON.stringify(data, null, 2))
+                    }
+                })
+            }
+
             $("#create-circles-button").click(createCircles)
             $("#find-my-circles").click(findCircles)
             $("#invite-join-button").click(inviteJoin)
             $("#request-join-button").click(requestJoin)
             $("#find-my-join-circles-button").click(findMyJoin)
+            $("#query-my-circles-request-join-button").click(queryMyCirclesRequestJoin)
+            $("#query-my-circles-invite-join-button").click(queryMyCirclesInviteJoin)
         });
 
     </script>

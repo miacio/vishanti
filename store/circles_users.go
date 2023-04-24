@@ -11,8 +11,9 @@ import (
 type circlesUsersStore struct{}
 
 type ICirclesUsersStore interface {
-	FindByUserId(userId string) ([]model.CirclesUsers, error) // FindByUserId 查看当前用户所在圈子列表
-	Create(model.CirclesUsers) (string, error)                // Create 创建圈子用户
+	FindByUserId(userId string) ([]model.CirclesUsers, error)                                  // FindByUserId 查看当前用户所在圈子列表
+	Create(model.CirclesUsers) (string, error)                                                 // Create 创建圈子用户
+	FindCirclesBySignType(signType string, circlesIds ...string) ([]model.CirclesUsers, error) // FindCirclesBySignType 依据加入状态查询对应圈子中的用户
 }
 
 var CirclesUsersStore ICirclesUsersStore = (*circlesUsersStore)(nil)
@@ -74,4 +75,12 @@ func (*circlesUsersStore) Create(circlesUsers model.CirclesUsers) (string, error
 	_, err = insertCirclesUsersEngine.InsertNamed("db", circlesUsers).Exec()
 	return circlesUsers.ID, err
 
+}
+
+// FindCirclesBySignType 依据加入状态查询对应圈子中的用户
+func (*circlesUsersStore) FindCirclesBySignType(signType string, circlesIds ...string) ([]model.CirclesUsers, error) {
+	eg := sqlt.NewSQLEngine[model.CirclesUsers](lib.DB)
+	var result []model.CirclesUsers
+	err := eg.Where("is_sign_out = ?", signType).In("circles_id in (?)", circlesIds).Find(&result)
+	return result, err
 }
