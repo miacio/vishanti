@@ -316,6 +316,7 @@ func (se *SQLEngine[T]) Get(obj any, columns ...string) error {
 		se.Select(columns...)
 	}
 	if se.optionType == SELECT {
+		lib.Log.Debugf("sql engine get: %s %v", se.sql, se.params)
 		err := se.db.Get(obj, se.sql, se.params...)
 		se.Clear()
 		return err
@@ -331,6 +332,7 @@ func (se *SQLEngine[T]) Find(obj any, columns ...string) error {
 		se.Select(columns...)
 	}
 	if se.optionType == SELECT {
+		lib.Log.Debugf("sql engine find: %s %v", se.sql, se.params)
 		err := se.db.Select(obj, se.sql, se.params...)
 		se.Clear()
 		return err
@@ -346,11 +348,12 @@ func (se *SQLEngine[T]) Exec() (sql.Result, error) {
 	var err error
 	switch se.optionType {
 	case UPDATE, DELETE:
-		lib.Log.Debugf("sql engine exec: %s [%v]", se.sql, se.params)
+		lib.Log.Debugf("sql engine exec update or delete: %s %v", se.sql, se.params)
 		result, err = se.db.Exec(se.sql, se.params...)
 		se.Clear()
 		return result, err
 	case INSERT:
+		lib.Log.Debugf("sql engine exec insert: %s %v", se.sql, se.params)
 		result, err = se.db.NamedExec(se.sql, se.params)
 		se.Clear()
 		return result, err

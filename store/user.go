@@ -85,6 +85,7 @@ func (u *userStore) EmailRegister(email, nickName, account, password string) (st
 		ID:            lib.UID(),
 		UserAccountID: id,
 		NickName:      nickName,
+		Vip:           "1",
 	}).Exec()
 	return id, err
 }

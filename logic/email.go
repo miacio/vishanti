@@ -63,7 +63,7 @@ func (e *emailLogic) SendCheckCode(ctx *gin.Context) {
 		}
 		lib.ServerSuccess(ctx, "发送成功", uid)
 	case "update":
-		uid, err := e.emailRegister(req.Email)
+		uid, err := e.emailUpdate(req.Email)
 		if !lib.ServerFail(ctx, err) {
 			return
 		}
